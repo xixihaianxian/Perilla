@@ -1,0 +1,106 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        primary: '#8B5CF6',
+        'primary-light': '#EDE9FE',
+        'primary-lighter': '#F5F3FF',
+        'primary-dark': '#7C3AED',
+        'text-primary': '#F1F1F3',
+        'text-secondary': '#A1A1AA',
+        'text-tertiary': '#71717A',
+        'text-placeholder': '#52525B',
+        'text-card-primary': '#1A1A1F',
+        'text-card-secondary': '#6B7280',
+        'text-card-tertiary': '#9CA3AF',
+        'bg-primary': '#FFFFFF',
+        'bg-page': '#1A1A1F',
+        'bg-sidebar': '#141418',
+        'bg-secondary': '#222228',
+        'bg-tertiary': '#2A2A30',
+        'bg-hover': '#32323A',
+        surface: '#FFFFFF',
+        'surface-hover': '#F8FAFC',
+        border: '#2E2E36',
+        'border-light': '#3A3A42',
+        'border-card': '#E5E7EB',
+        like: '#F43F5E',
+        save: '#8B5CF6',
+      },
+      boxShadow: {
+        xs: '0 1px 2px rgba(0,0,0,0.3)',
+        sm: '0 2px 8px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.2)',
+        md: '0 4px 16px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.25)',
+        lg: '0 8px 32px rgba(0,0,0,0.45), 0 3px 8px rgba(0,0,0,0.3)',
+        xl: '0 16px 48px rgba(0,0,0,0.5), 0 6px 12px rgba(0,0,0,0.35)',
+        'card-hover': '0 12px 40px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.35)',
+        overlay: '0 24px 64px rgba(0,0,0,0.55)',
+      },
+      fontFamily: {
+        sans: [
+          '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', '"PingFang SC"',
+          '"Hiragino Sans GB"', '"Microsoft YaHei"', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif',
+        ],
+      },
+      borderRadius: {
+        '2xl': '20px',
+        '3xl': '24px',
+      },
+      transitionTimingFunction: {
+        'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
+        'in-out-expo': 'cubic-bezier(0.66, 0, 0.34, 1)',
+        'out-back': 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+        spring: 'cubic-bezier(0.22, 0.99, 0.43, 1.12)',
+      },
+      animation: {
+        shimmer: 'shimmer 1.8s ease-in-out infinite',
+        'fade-in': 'fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'scale-in': 'scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+        'heart-pulse': 'heartPulse 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+        'bookmark-pop': 'bookmarkPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+        float: 'float 3s ease-in-out infinite',
+      },
+      keyframes: {
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        fadeIn: {
+          from: { opacity: '0', transform: 'translateY(10px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideUp: {
+          from: { opacity: '0', transform: 'translateY(24px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        scaleIn: {
+          from: { opacity: '0', transform: 'scale(0.92)' },
+          to: { opacity: '1', transform: 'scale(1)' },
+        },
+        heartPulse: {
+          '0%': { transform: 'scale(1)' },
+          '20%': { transform: 'scale(1.3)' },
+          '40%': { transform: 'scale(0.85)' },
+          '60%': { transform: 'scale(1.15)' },
+          '80%': { transform: 'scale(0.95)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        bookmarkPop: {
+          '0%': { transform: 'scale(1)' },
+          '30%': { transform: 'scale(0.8)' },
+          '60%': { transform: 'scale(1.2)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-6px)' },
+        },
+      },
+    },
+  },
+  plugins: [],
+}
