@@ -19,7 +19,7 @@ export const useAuthStore = defineStore('auth', () => {
     setToken(res.data.token)
   }
 
-  async function register(data: { username: string; email: string; password: string }) {
+  async function register(data: { name: string; nickname: string; phone: string; email: string; password: string; gender: number }) {
     const { authApi } = await import('@/api/auth')
     const res = await authApi.register(data)
     token.value = res.data.token

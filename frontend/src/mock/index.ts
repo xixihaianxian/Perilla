@@ -97,26 +97,28 @@ class MockDB {
     return this.wrap({ token, user })
   }
 
-  async register(data: { username: string; email: string; password: string }) {
+  async register(data: { name: string; nickname: string; phone: string; email: string; password: string; gender: number }) {
     await simulateDelay()
     simulateError()
 
     const exists = [...this.users.values()].some(
-      (u) => u.username === data.username || u.email === data.email,
+      (u) => u.username === data.name || u.email === data.email,
     )
     if (exists) {
       throw new Error('用户名或邮箱已被注册')
     }
 
+    const genderMap: Record<number, 'male' | 'female' | 'other'> = { 0: 'female', 1: 'male', 2: 'other' }
+
     const now = new Date().toISOString()
     const user: User = {
       id: generateId('user'),
-      username: data.username,
+      username: data.name,
       email: data.email,
-      nickname: data.username,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.username}`,
+      nickname: data.nickname,
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.name}`,
       bio: '',
-      gender: 'other',
+      gender: genderMap[data.gender] ?? 'other',
       birthday: null!,
       location: '',
       website: '',

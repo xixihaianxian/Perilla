@@ -5,7 +5,7 @@ export const authApi = {
     return mockDB.login(data.username, data.password)
   },
 
-  async register(data: { username: string; email: string; password: string }) {
+  async register(data: { name: string; nickname: string; phone: string; email: string; password: string; gender: number }) {
     return mockDB.register(data)
   },
 
