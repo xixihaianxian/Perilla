@@ -599,3 +599,27 @@ select * from user;
 select * from topic;
 
 select count(*) from topic;
+
+select * from topic_comments_number order by number asc ;
+
+show tables ;
+
+show create table user;
+
+-- 评论过表
+create table comments(
+    id bigint unsigned primary key auto_increment not null,
+    user_id bigint not null comment '用户id',
+    topic_id bigint not null comment '话题id',
+    parent_id bigint unsigned default 0 comment '0表示一级评论id',
+    reply_to_user_id bigint unsigned default null comment '回复用户的id',
+    content text not null check ( length(content) between 1 and 120) comment '评论内容',
+    likes_count bigint default 0 comment '点赞数',
+    created_at datetime default current_timestamp comment '创建时间',
+    updated_at datetime default current_timestamp on update current_timestamp comment '更新时间',
+    index idx_user_id (user_id),
+    index idx_topic_di (topic_id),
+    index idx_parent_id (parent_id),
+    constraint fk_user_user_id foreign key (user_id) references user(id) on delete cascade on update cascade ,
+    constraint fk_topic_topic_id foreign key (topic_id) references topic(id) on delete cascade on update cascade
+)engine = innoDB charset = utf8mb4;
