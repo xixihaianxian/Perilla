@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { topicApi } from '@/api/topic'
 
 export interface TopicDialogData {
   title: string
@@ -9,6 +10,7 @@ export interface TopicDialogData {
   username: string
   bio: string
   created_at: string
+  topic_id?: number
   note_count?: number
   follower_count?: number
   star_count?: number
@@ -27,12 +29,52 @@ const emit = defineEmits<{
 }>()
 
 const isFollowing = ref(false)
+const mediaImages = ref<string[]>([])
+const currentImageIndex = ref(0)
+
+/** 获取媒体图片 */
+async function fetchMedia() {
+  if (!props.topic.topic_id) return
+  try {
+    const urls = await topicApi.getTopicMedia(props.topic.topic_id)
+    mediaImages.value = urls
+  } catch {
+    mediaImages.value = []
+  }
+}
+
+/** 弹窗打开时获取图片，关闭时重置 */
+watch(() => props.modelValue, (visible) => {
+  if (visible) {
+    currentImageIndex.value = 0
+    mediaImages.value = []
+    fetchMedia()
+  }
+}, { immediate: true })
+
+/** 当前封面 URL：优先使用媒体图片，回退到 topic.cover_image */
+const currentCoverUrl = computed(() => {
+  if (mediaImages.value.length > 0) {
+    return mediaImages.value[currentImageIndex.value] ?? mediaImages.value[0]
+  }
+  return props.topic.cover_image
+})
 
 const coverStyle = computed(() => ({
-  backgroundImage: props.topic.cover_image
-    ? `linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.42)), url(${props.topic.cover_image})`
+  backgroundImage: currentCoverUrl.value
+    ? `linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.42)), url(${currentCoverUrl.value})`
     : 'linear-gradient(135deg, var(--color-bg-secondary), var(--color-bg-tertiary))',
 }))
+
+function prevImage() {
+  if (mediaImages.value.length <= 1) return
+  currentImageIndex.value = (currentImageIndex.value - 1 + mediaImages.value.length) % mediaImages.value.length
+}
+
+function nextImage() {
+  if (mediaImages.value.length <= 1) return
+  currentImageIndex.value = (currentImageIndex.value + 1) % mediaImages.value.length
+}
 
 function closeDialog() {
   emit('update:modelValue', false)
@@ -60,6 +102,39 @@ function formatCount(count: number): string {
 
         <section class="topic-dialog__panel" role="dialog" aria-modal="true">
           <div class="topic-dialog__cover" :style="coverStyle">
+            <!-- 图片切换箭头 -->
+            <button
+              v-if="mediaImages.length > 1"
+              class="cover-arrow cover-arrow--left"
+              type="button"
+              aria-label="上一张"
+              @click.stop="prevImage"
+            >
+              <el-icon :size="22"><ArrowLeft /></el-icon>
+            </button>
+            <button
+              v-if="mediaImages.length > 1"
+              class="cover-arrow cover-arrow--right"
+              type="button"
+              aria-label="下一张"
+              @click.stop="nextImage"
+            >
+              <el-icon :size="22"><ArrowRight /></el-icon>
+            </button>
+
+            <!-- 圆点指示器 -->
+            <div v-if="mediaImages.length > 1" class="cover-dots">
+              <button
+                v-for="(_, i) in mediaImages"
+                :key="i"
+                class="cover-dot"
+                :class="{ 'cover-dot--active': i === currentImageIndex }"
+                type="button"
+                :aria-label="`第 ${i + 1} 张`"
+                @click.stop="currentImageIndex = i"
+              />
+            </div>
+
             <div class="topic-dialog__cover-badge">话题</div>
             <div class="topic-dialog__cover-title">
               <img
@@ -198,6 +273,67 @@ function formatCount(count: number): string {
   min-height: 360px;
   background-position: center;
   background-size: cover;
+  transition: background-image 0.35s ease;
+}
+
+/* ===== 图片切换箭头 ===== */
+.cover-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.cover-arrow:hover {
+  background: rgba(0, 0, 0, 0.7);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.cover-arrow--left {
+  left: 14px;
+}
+
+.cover-arrow--right {
+  right: 14px;
+}
+
+/* ===== 圆点指示器 ===== */
+.cover-dots {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transform: translateX(-50%);
+}
+
+.cover-dot {
+  width: 8px;
+  height: 8px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.cover-dot--active {
+  background: #fff;
+  transform: scale(1.35);
 }
 
 .topic-dialog__cover-badge {

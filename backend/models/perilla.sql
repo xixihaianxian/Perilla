@@ -589,3 +589,13 @@ truncate table topic_media;
 update topic_start_browser set browser=3 where note_id=1;
 
 select * from topic where id=1;
+
+show tables ;
+
+select media_url from topic_media where note_id=1;
+
+select * from user;
+
+select * from topic;
+
+select count(*) from topic;

@@ -77,3 +77,19 @@ async def starts_views(topic_id:int,db:AsyncSession=Depends(database_config.get_
             "message":"success",
             "data":topic_start_views
         }
+
+@router.get("/topic/media")
+async def media(topic_id:int,db:AsyncSession=Depends(database_config.get_session_orm)):
+    topic_media=await recommend.fetch_topic_media(db=db,topic_id=topic_id)
+    if topic_media is None:
+        return {
+            "code":404,
+            "message":"failure",
+            "data":"The topic has been deleted",
+        }
+    else:
+        return {
+            "code":200,
+            "message":"success",
+            "data":topic_media,
+        }

@@ -68,6 +68,7 @@ async function onCardClick(note: Note) {
       username: detail.author,
       bio: detail.bio,
       created_at: detail.publish_time,
+      topic_id: item.id,
       star_count: stats.start,
       view_count: stats.browser,
     }
@@ -82,6 +83,7 @@ async function onCardClick(note: Note) {
       username: item.username,
       bio: '',
       created_at: item.created_at,
+      topic_id: item.id,
     }
     topicDialogVisible.value = true
   }

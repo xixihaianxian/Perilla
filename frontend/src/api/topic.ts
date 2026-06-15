@@ -44,6 +44,8 @@ export interface TopicStatsResponse {
   browser: number
 }
 
+export type MediaItem = string
+
 export const topicApi = {
   /** GET /api/recommend/topic */
   async getTopicFeed(params: TopicFeedParams = {}): Promise<TopicFeedResponse> {
@@ -68,6 +70,14 @@ export const topicApi = {
   /** GET /api/recommend/topic/starts_views */
   async getTopicStats(topicId: number): Promise<TopicStatsResponse> {
     const res = await instance.get<{ data: TopicStatsResponse }>('/recommend/topic/starts_views', {
+      params: { topic_id: topicId },
+    })
+    return res.data.data
+  },
+
+  /** GET /api/recommend/topic/media */
+  async getTopicMedia(topicId: number): Promise<string[]> {
+    const res = await instance.get<{ data: string[] }>('/recommend/topic/media', {
       params: { topic_id: topicId },
     })
     return res.data.data

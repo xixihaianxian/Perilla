@@ -2,7 +2,8 @@ from sqlalchemy import select,func,update
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 from config import database_config
-from models.recommend import Topic,User,TopicStartBrowser
+from models.recommend import Topic, User, TopicStartBrowser, TopicMedia
+
 
 # 获取topic
 async def fetch_topic(db:AsyncSession,page:int=0,page_size:int=10,category_id:int=0):
@@ -72,3 +73,14 @@ async def update_views(db:AsyncSession,topic_id:int):
     await db.commit()
     # 获取修改命中的数据数
     return result.rowcount>0
+
+# 话题图片
+async def fetch_topic_media(db:AsyncSession,topic_id:int):
+    stmt=select(TopicMedia.media_url).where(TopicMedia.note_id==topic_id)
+    result=await db.execute(stmt)
+    # media返回的是一个list
+    media=result.scalars().all()
+    if len(media)==0:
+        return None
+    else:
+        return media
