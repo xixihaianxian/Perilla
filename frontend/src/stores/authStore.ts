@@ -22,9 +22,13 @@ export const useAuthStore = defineStore('auth', () => {
   async function register(data: { name: string; nickname: string; phone: string; email: string; password: string; gender: number }) {
     const { authApi } = await import('@/api/auth')
     const res = await authApi.register(data)
-    token.value = res.data.token
-    user.value = res.data.user
-    setToken(res.data.token)
+    const body = res.data
+    if (body.code !== 200) {
+      throw new Error(body.data || body.message || '注册失败')
+    }
+    token.value = body.data.token
+    user.value = body.data.userInfo as User
+    setToken(body.data.token)
   }
 
   function logout() {

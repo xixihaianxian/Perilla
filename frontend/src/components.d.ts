@@ -30,6 +30,7 @@ declare module 'vue' {
     ConversationList: typeof import('./components/message/ConversationList.vue')['default']
     DataTable: typeof import('./components/admin/DataTable.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
+    ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
     ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
     ElDropdownMenu: typeof import('element-plus/es')['ElDropdownMenu']

@@ -1,3 +1,4 @@
+import instance from './index'
 import mockDB from '@/mock'
 
 export const authApi = {
@@ -6,7 +7,7 @@ export const authApi = {
   },
 
   async register(data: { name: string; nickname: string; phone: string; email: string; password: string; gender: number }) {
-    return mockDB.register(data)
+    return instance.post('/user/register', data)
   },
 
   async getCurrentUser() {

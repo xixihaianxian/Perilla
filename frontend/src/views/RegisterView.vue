@@ -33,22 +33,23 @@ function selectGender(value: number) {
 }
 
 async function handleRegister() {
-  if (!form.name || !form.nickname || !form.phone || !form.email || !form.password) {
-    error.value = '请填写所有必填字段'
-    return
-  }
-  if (form.password !== form.confirmPassword) {
-    error.value = '两次密码输入不一致'
-    return
-  }
-  if (form.password.length < 6) {
-    error.value = '密码长度不能少于6位'
-    return
-  }
-  if (!/^1\d{10}$/.test(form.phone)) {
-    error.value = '请输入正确的手机号'
-    return
-  }
+  // 前端验证已注释，由后端统一校验
+  // if (!form.name || !form.nickname || !form.phone || !form.email || !form.password) {
+  //   error.value = '请填写所有必填字段'
+  //   return
+  // }
+  // if (form.password !== form.confirmPassword) {
+  //   error.value = '两次密码输入不一致'
+  //   return
+  // }
+  // if (form.password.length < 6) {
+  //   error.value = '密码长度不能少于6位'
+  //   return
+  // }
+  // if (!/^1\d{10}$/.test(form.phone)) {
+  //   error.value = '请输入正确的手机号'
+  //   return
+  // }
   loading.value = true
   error.value = ''
   try {
@@ -61,8 +62,9 @@ async function handleRegister() {
       gender: form.gender,
     })
     router.push('/')
-  } catch {
-    error.value = '注册失败，请稍后重试'
+  } catch (e: any) {
+    const detail = e.response?.data?.detail
+    error.value = detail || e.message || '注册失败，请稍后重试'
   } finally {
     loading.value = false
   }
