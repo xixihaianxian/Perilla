@@ -11,6 +11,25 @@ const form = reactive({ username: '', password: '', remember: false })
 const loading = ref(false)
 const error = ref('')
 
+function handleFormKeydown(e: KeyboardEvent) {
+  const inputs = (e.currentTarget as HTMLElement).querySelectorAll<HTMLElement>(
+    'input:not([type="checkbox"]):not([type="hidden"])'
+  )
+  if (!inputs.length) return
+  const arr = Array.from(inputs)
+  const idx = arr.indexOf(document.activeElement as HTMLElement)
+  if (idx === -1) return
+  if (e.key === 'ArrowDown') {
+    e.preventDefault()
+    const next = arr[(idx + 1) % arr.length]
+    next?.focus()
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault()
+    const prev = arr[(idx - 1 + arr.length) % arr.length]
+    prev?.focus()
+  }
+}
+
 async function handleLogin() {
   if (!form.username || !form.password) { error.value = '请输入用户名和密码'; return }
   loading.value = true; error.value = ''
@@ -105,7 +124,7 @@ async function handleLogin() {
           <p class="login-card__form-subtitle">还没有账号？<router-link to="/register">立即注册</router-link></p>
         </div>
 
-        <form class="login-card__form" @submit.prevent="handleLogin">
+        <form class="login-card__form" @submit.prevent="handleLogin" @keydown="handleFormKeydown">
           <el-input v-model="form.username" placeholder="用户名或邮箱" size="large" clearable :prefix-icon="User" />
           <el-input v-model="form.password" type="password" placeholder="密码" size="large" show-password :prefix-icon="Lock" />
 

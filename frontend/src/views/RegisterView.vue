@@ -20,6 +20,25 @@ const form = reactive({
 const loading = ref(false)
 const error = ref('')
 
+function handleFormKeydown(e: KeyboardEvent) {
+  const inputs = (e.currentTarget as HTMLElement).querySelectorAll<HTMLElement>(
+    'input:not([type="checkbox"]):not([type="hidden"])'
+  )
+  if (!inputs.length) return
+  const arr = Array.from(inputs)
+  const idx = arr.indexOf(document.activeElement as HTMLElement)
+  if (idx === -1) return
+  if (e.key === 'ArrowDown') {
+    e.preventDefault()
+    const next = arr[(idx + 1) % arr.length]
+    next?.focus()
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault()
+    const prev = arr[(idx - 1 + arr.length) % arr.length]
+    prev?.focus()
+  }
+}
+
 const genderOptions = [
   { label: '女', value: 0 },
   { label: '男', value: 1 },
@@ -64,7 +83,11 @@ async function handleRegister() {
     router.push('/')
   } catch (e: any) {
     const detail = e.response?.data?.detail
-    error.value = detail || e.message || '注册失败，请稍后重试'
+    if (e.code === 'ECONNABORTED' || e.message?.includes('timeout')) {
+      error.value = '请求超时，请检查网络后重试'
+    } else {
+      error.value = detail || e.message || '注册失败，请稍后重试'
+    }
   } finally {
     loading.value = false
   }
@@ -154,7 +177,7 @@ async function handleRegister() {
           <p class="register-card__form-subtitle">已有账号？<router-link to="/login">立即登录</router-link></p>
         </div>
 
-        <form class="register-card__form" @submit.prevent="handleRegister">
+        <form class="register-card__form" @submit.prevent="handleRegister" @keydown="handleFormKeydown">
           <el-input v-model="form.name" placeholder="用户名" size="large" clearable :prefix-icon="User" />
           <el-input v-model="form.nickname" placeholder="昵称" size="large" clearable :prefix-icon="Stamp" />
           <el-input v-model="form.phone" type="tel" placeholder="手机号" size="large" clearable :prefix-icon="PhoneFilled" />

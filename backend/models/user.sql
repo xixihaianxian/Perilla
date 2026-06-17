@@ -28,3 +28,9 @@ create table user_token(
 #     begin
 #         update user_token set NEW.expires_at=DATE_ADD(NEW.created_at,interval 7 day ) where id=NEW.id;
 #     end;
+
+delete from user where username='lisisi';
+
+select * from user_token;
+
+show tables ;

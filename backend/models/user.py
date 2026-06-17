@@ -1,11 +1,12 @@
-from sqlalchemy.orm import DeclarativeBase,Mapped,mapped_column
+from sqlalchemy.orm import DeclarativeBase,Mapped,mapped_column,relationship
 from sqlalchemy import BigInteger,ForeignKey,String,DateTime,func,Index
 from typing import Optional
 from datetime import datetime
+from utils.table_base import Base
 
 # 基类
-class Base(DeclarativeBase):
-    pass
+# class Base(DeclarativeBase):
+#     pass
 
 # 构建user_token
 class UserToken(Base):

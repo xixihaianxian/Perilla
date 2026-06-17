@@ -4,6 +4,9 @@ from models import recommend,user
 from schema.user import UserRequest
 from utils import security
 from datetime import datetime,timedelta
+from config.setting import AvatarSetting
+import os
+import random
 
 # 根据用户名获取用户
 async def get_user_by_name(username:str,db:AsyncSession):
@@ -16,12 +19,18 @@ async def get_user_by_name(username:str,db:AsyncSession):
 async def create_user(db:AsyncSession,user_info:UserRequest):
     password=user_info.password
     encryption_password=security.get_hash_password(password=password)
+    avatar_setting=AvatarSetting()
+    default_avatar_path=avatar_setting.DEFAULT_AVATAR_DIR
+    default_avatar_names=os.listdir(default_avatar_path)
+    default_avatar_name=random.choice(default_avatar_names)
+    default_avatar_path=os.path.join("avatars","robot",default_avatar_name)
     new_user=recommend.User(username=user_info.name,
                             nickname=user_info.nickname,
                             password_hash=encryption_password,
                             phone=user_info.phone,
                             email=user_info.email,
-                            gender=user_info.gender)
+                            gender=user_info.gender,
+                            avatar=default_avatar_path)
     db.add(new_user)
     await db.commit()
     # 使用最新的内容覆盖掉内存中的new_user
@@ -48,3 +57,6 @@ async def create_token(db:AsyncSession,user_id:int):
         await db.commit()
     # 返回token
     return token
+
+if __name__=="__main__":
+    pass

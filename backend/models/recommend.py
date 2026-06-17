@@ -3,18 +3,19 @@ from sqlalchemy.orm import DeclarativeBase,mapped_column,Mapped
 from datetime import datetime
 from typing import Optional
 from datetime import date
+from utils.table_base import Base
 
-class Base(DeclarativeBase):
-    created_at:Mapped[datetime]=mapped_column(__name_pos=DateTime,default=func.now())
-    updated_at:Mapped[datetime]=mapped_column(__name_pos=DateTime,default=func.now(),onupdate=func.now())
+class TimestampMixin:
+    created_at:Mapped[datetime]=mapped_column(DateTime,default=func.now())
+    updated_at:Mapped[datetime]=mapped_column(DateTime,default=func.now(),onupdate=func.now())
 
-class Categories(Base):
+class Categories(Base,TimestampMixin):
     __tablename__ = "categories"
-    id:Mapped[int]=mapped_column(__name_pos=Integer,primary_key=True,autoincrement=True)
-    name:Mapped[str]=mapped_column(__name_pos=String(100),unique=True,nullable=False)
+    id:Mapped[int]=mapped_column(Integer,primary_key=True,autoincrement=True)
+    name:Mapped[str]=mapped_column(String(100),unique=True,nullable=False)
 
 
-class User(Base):
+class User(Base,TimestampMixin):
     __tablename__ = "user"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
@@ -34,7 +35,7 @@ class User(Base):
         return f"<User(id={self.id}, username={self.username}, nickname={self.nickname})>"
 
 
-class Topic(Base):
+class Topic(Base,TimestampMixin):
     __tablename__ = "topic"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
@@ -60,7 +61,7 @@ class Topic(Base):
 
 
 # 话题素材表
-class TopicMedia(Base):
+class TopicMedia(Base,TimestampMixin):
     __tablename__ = 'topic_media'
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
@@ -73,7 +74,7 @@ class TopicMedia(Base):
 
 
 # 话题收藏浏览表
-class TopicStartBrowser(Base):
+class TopicStartBrowser(Base,TimestampMixin):
     __tablename__ = 'topic_start_browser'
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
@@ -83,7 +84,7 @@ class TopicStartBrowser(Base):
     browser: Mapped[Optional[int]] = mapped_column(BigInteger)
 
 
-class TopicCommentsNumber(Base):
+class TopicCommentsNumber(Base,TimestampMixin):
     __tablename__ = 'topic_comments_number'
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)

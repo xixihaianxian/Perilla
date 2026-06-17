@@ -7,7 +7,7 @@ export const authApi = {
   },
 
   async register(data: { name: string; nickname: string; phone: string; email: string; password: string; gender: number }) {
-    return instance.post('/user/register', data)
+    return instance.post('/user/register', data, { timeout: 40000 })
   },
 
   async getCurrentUser() {
