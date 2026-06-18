@@ -2,8 +2,8 @@ import instance from './index'
 import mockDB from '@/mock'
 
 export const authApi = {
-  async login(data: { username: string; password: string }) {
-    return mockDB.login(data.username, data.password)
+  async login(data: { name_or_email: string; password: string }) {
+    return instance.post('/user/login', data)
   },
 
   async register(data: { name: string; nickname: string; phone: string; email: string; password: string; gender: number }) {
@@ -11,13 +11,7 @@ export const authApi = {
   },
 
   async getCurrentUser() {
-    // Parse user ID from stored token
-    const token = localStorage.getItem('perilla_token')
-    if (!token) throw new Error('未登录')
-    // For mock, use the first user as the current user
-    const userId = [...mockDB.users.values()][0]?.id
-    if (!userId) throw new Error('用户不存在')
-    return mockDB.getCurrentUser(userId)
+    return instance.get('/user/me')
   },
 
   async refreshToken() {

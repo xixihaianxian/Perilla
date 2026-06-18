@@ -1,8 +1,11 @@
 from fastapi import FastAPI
 from routers import recommend,user
 from fastapi.middleware.cors import CORSMiddleware
+from utils import abnormal
 
 app=FastAPI()
+
+abnormal.register_exception_handler(app=app)
 
 app.add_middleware(
     middleware_class=CORSMiddleware,

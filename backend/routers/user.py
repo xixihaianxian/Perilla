@@ -1,8 +1,8 @@
 from fastapi import APIRouter,Depends,status
 from config import database_config
 from sqlalchemy.ext.asyncio import AsyncSession
-from schema.user import UserRequest,UserAuthResponse,UserInfoResponse
-from crud.user import get_user_by_name,create_user,create_token
+from schema.user import UserRequest,UserAuthResponse,UserInfoResponse,UserLoginRequest,UserLoginResponse,UserLoginAuthResponse
+from crud.user import get_user_by_name,create_user,create_token,authenticate_user
 from fastapi.exceptions import HTTPException
 import uuid
 from utils import response
@@ -30,6 +30,7 @@ async def register(user_info:UserRequest,db:AsyncSession=Depends(database_config
         #         }
         #     }
         # }
+        # model_validate将原本的数据转化为pydantic对象
         response_data=UserInfoResponse.model_validate(new_user)
         return response.success_response(data=UserAuthResponse(token=token,user_info=response_data))
     else:
@@ -39,3 +40,13 @@ async def register(user_info:UserRequest,db:AsyncSession=Depends(database_config
         #     "data":"The user already exists!"
         # }
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="The user already exists!")
+
+@router.post("/login")
+async def login(user_info:UserLoginRequest,db:AsyncSession=Depends(database_config.get_session_orm)):
+    authenticate,user=await authenticate_user(db=db,name_or_email=user_info.name_or_email,password=user_info.password)
+    if authenticate:
+        token=await create_token(db=db,user_id=user.id)
+        response_data=UserLoginResponse.model_validate(user)
+        return response.success_response(data=UserLoginAuthResponse(token=token,user_info=response_data))
+    else:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Wrong username or password")

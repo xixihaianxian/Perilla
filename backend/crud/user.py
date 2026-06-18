@@ -47,9 +47,13 @@ async def create_token(db:AsyncSession,user_id:int):
     user_token=result.scalar_one_or_none()
     # 更新token
     if user_token is not None:
-        user_token.token=token
-        user_token.expires_at=expires_at
-        user_token.created_at=datetime.now()
+        # 判断是否过期
+        if datetime.now()>user_token.expires_at:
+            user_token.token=token
+            user_token.expires_at=expires_at
+            user_token.created_at=datetime.now()
+        else:
+            token=user_token.token
     # 添加token
     else:
         user_token=user.UserToken(user_id=user_id,token=token,expires_at=expires_at)
@@ -57,6 +61,27 @@ async def create_token(db:AsyncSession,user_id:int):
         await db.commit()
     # 返回token
     return token
+
+# 判断用户是否存在
+async def authenticate_user(db:AsyncSession,name_or_email,password)->tuple:
+    # 根据用户名来判断
+    stmt_by_name=select(recommend.User).where(recommend.User.username==name_or_email)
+    result_by_name=await db.execute(stmt_by_name)
+    user_by_name=result_by_name.scalar_one_or_none()
+    # 更具邮箱来判断
+    stmt_by_email=select(recommend.User).where(recommend.User.email==name_or_email)
+    result_by_email=await db.execute(stmt_by_email)
+    user_by_email=result_by_email.scalar_one_or_none()
+    if user_by_name is not None:
+        password_by_name = user_by_name.password_hash
+        authenticate=security.verify_password(hash_password=password_by_name,password=password)
+        return authenticate,user_by_name
+    elif user_by_email is not None:
+        password_by_email = user_by_email.password_hash
+        authenticate=security.verify_password(hash_password=password_by_email,password=password)
+        return authenticate,user_by_email
+    else:
+        return False,None
 
 if __name__=="__main__":
     pass

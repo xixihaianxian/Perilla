@@ -11,12 +11,15 @@ export const useAuthStore = defineStore('auth', () => {
   const isAdmin = computed(() => user.value?.role === 'admin')
 
   async function login(username: string, password: string) {
-    // Will be implemented in Phase 4 with mock API
     const { authApi } = await import('@/api/auth')
-    const res = await authApi.login({ username, password })
-    token.value = res.data.token
-    user.value = res.data.user
-    setToken(res.data.token)
+    const res = await authApi.login({ name_or_email: username, password })
+    const body = res.data
+    if (body.code !== 200) {
+      throw new Error(body.data || body.message || '登录失败')
+    }
+    token.value = body.data.token
+    user.value = body.data.UserInfo as User
+    setToken(body.data.token)
   }
 
   async function register(data: { name: string; nickname: string; phone: string; email: string; password: string; gender: number }) {
@@ -42,7 +45,12 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const { authApi } = await import('@/api/auth')
       const res = await authApi.getCurrentUser()
-      user.value = res.data
+      const body = res.data
+      if (body.code !== 200) {
+        logout()
+        return
+      }
+      user.value = body.data as User
     } catch {
       logout()
     }

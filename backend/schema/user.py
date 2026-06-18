@@ -1,6 +1,7 @@
 from pydantic import BaseModel,Field,ConfigDict
 from typing import Optional
 
+# 用户注册时需要填写的信息
 class UserRequest(BaseModel):
     name:str
     password:str
@@ -33,6 +34,28 @@ class UserAuthResponse(BaseModel):
     token:str
     user_info:UserInfoResponse=Field(...,validation_alias="userInfo",serialization_alias="userInfo")
     model_config = ConfigDict(
-        populate_by_name=True, # alias和字段并兼容
+        populate_by_name=True, # alias和字段兼容
         from_attributes=True, # 允许从ORM对象中获取值
+    )
+
+# 用户登录时需要填写的信息
+class UserLoginRequest(BaseModel):
+    name_or_email:str
+    password:str
+
+
+class UserLoginResponse(BaseModel):
+    username:str=Field(...,max_length=50)
+    avatar:str=Field(...,max_length=500)
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True
+    )
+
+class UserLoginAuthResponse(BaseModel):
+    token:str
+    user_info:UserLoginResponse=Field(...,validation_alias="UserInfo",serialization_alias="UserInfo")
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
     )

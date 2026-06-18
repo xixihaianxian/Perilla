@@ -9,6 +9,11 @@ export function setupGuards(router: Router) {
     // Initialize auth store (needed outside of component context)
     const authStore = useAuthStore()
 
+    // Restore user info if token exists but user data is lost (e.g. after page refresh)
+    if (authStore.token && !authStore.user) {
+      await authStore.fetchCurrentUser()
+    }
+
     // Check if user is authenticated
     if (to.meta.requiresAuth && !authStore.isAuthenticated) {
       return next({ name: 'Login', query: { redirect: to.fullPath } })

@@ -34,3 +34,9 @@ delete from user where username='lisisi';
 select * from user_token;
 
 show tables ;
+
+select token from user_token where user_id=16;
+
+select * from user where id=16;
+
+select * from user;
