@@ -83,5 +83,27 @@ async def authenticate_user(db:AsyncSession,name_or_email,password)->tuple:
     else:
         return False,None
 
+# 根据token查找用户信息
+async def fetch_user_info_by_token(token:str,db:AsyncSession):
+    stmt = select(
+        # recommend.User.id,
+        recommend.User.username,
+        recommend.User.avatar,
+        user.UserToken.expires_at
+    ).join(
+        user.UserToken,
+        user.UserToken.user_id == recommend.User.id
+    ).where(
+        user.UserToken.token == token
+    )
+    result=await db.execute(stmt)
+    user_info=result.first()
+    if user_info is None:
+        return None
+    if datetime.now()>user_info.expires_at:
+        return None
+    else:
+        return user_info
+
 if __name__=="__main__":
     pass

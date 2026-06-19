@@ -1,5 +1,5 @@
 import instance from './index'
-import mockDB from '@/mock'
+import { getToken, removeToken } from '@/utils/token'
 
 export const authApi = {
   async login(data: { name_or_email: string; password: string }) {
@@ -11,17 +11,16 @@ export const authApi = {
   },
 
   async getCurrentUser() {
-    return instance.get('/user/me')
+    return instance.post('/user/me')
   },
 
   async refreshToken() {
-    // Mock: just return the same token
-    const token = localStorage.getItem('perilla_token')
+    const token = getToken()
     return { code: 200, message: 'success', data: { token } }
   },
 
   async logout() {
-    localStorage.removeItem('perilla_token')
+    removeToken()
     return { code: 200, message: 'success', data: null }
   },
 }

@@ -59,3 +59,10 @@ class UserLoginAuthResponse(BaseModel):
         from_attributes=True,
         populate_by_name=True,
     )
+
+class CurrentUserResponse(BaseModel):
+    user_info:UserLoginResponse=Field(...,validation_alias="UserInfo",serialization_alias="UserInfo")
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True
+    )

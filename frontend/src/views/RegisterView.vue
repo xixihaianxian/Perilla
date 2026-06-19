@@ -80,7 +80,7 @@ async function handleRegister() {
       password: form.password,
       gender: form.gender,
     })
-    router.push('/')
+    router.push({ name: 'Login' })
   } catch (e: any) {
     const detail = e.response?.data?.detail
     if (e.code === 'ECONNABORTED' || e.message?.includes('timeout')) {

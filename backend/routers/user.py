@@ -1,11 +1,14 @@
 from fastapi import APIRouter,Depends,status
 from config import database_config
 from sqlalchemy.ext.asyncio import AsyncSession
-from schema.user import UserRequest,UserAuthResponse,UserInfoResponse,UserLoginRequest,UserLoginResponse,UserLoginAuthResponse
-from crud.user import get_user_by_name,create_user,create_token,authenticate_user
+from schema.user import UserRequest,UserAuthResponse,UserInfoResponse,UserLoginRequest,UserLoginResponse,UserLoginAuthResponse,CurrentUserResponse
+from crud.user import get_user_by_name,create_user,create_token,authenticate_user,fetch_user_info_by_token
 from fastapi.exceptions import HTTPException
 import uuid
 from utils import response
+from fastapi.security import OAuth2PasswordBearer
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/user/login")
 
 router=APIRouter(prefix="/api/user",tags=["user"])
 
@@ -50,3 +53,13 @@ async def login(user_info:UserLoginRequest,db:AsyncSession=Depends(database_conf
         return response.success_response(data=UserLoginAuthResponse(token=token,user_info=response_data))
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Wrong username or password")
+
+
+@router.post("/me")
+async def fetch_me(token:OAuth2PasswordBearer=Depends(oauth2_scheme),db:AsyncSession=Depends(database_config.get_session_orm)):
+    user_info=await fetch_user_info_by_token(token=token,db=db)
+    if user_info is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Please log in again!")
+    else:
+        response_data=UserLoginResponse.model_validate(user_info)
+        return response.success_response(data=CurrentUserResponse(user_info=response_data))

@@ -40,3 +40,10 @@ select token from user_token where user_id=16;
 select * from user where id=16;
 
 select * from user;
+
+select user_id from user_token where token='217af910-22ed-4a70-a316-378c75787021';
+
+select user.id, username, user.avatar
+from user
+         inner join (select user_id from user_token where token = '217af910-22ed-4a70-a316-378c75787021') as id
+                    on id.user_id = user.id;

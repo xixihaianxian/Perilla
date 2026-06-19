@@ -50,7 +50,7 @@ export const useAuthStore = defineStore('auth', () => {
         logout()
         return
       }
-      user.value = body.data as User
+      user.value = body.data.UserInfo as User
     } catch {
       logout()
     }

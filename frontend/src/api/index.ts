@@ -33,7 +33,11 @@ instance.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 401) {
       removeToken()
-      window.location.href = '/login'
+      const router = (await import('@/router')).default
+      if (router.currentRoute.value.name !== 'Login') {
+        const currentPath = router.currentRoute.value.fullPath
+        router.push({ name: 'Login', query: { redirect: currentPath } })
+      }
     }
     return Promise.reject(error)
   },
