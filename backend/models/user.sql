@@ -47,3 +47,10 @@ select user.id, username, user.avatar
 from user
          inner join (select user_id from user_token where token = '217af910-22ed-4a70-a316-378c75787021') as id
                     on id.user_id = user.id;
+
+update user set bio='这个人很神秘，什么都没留下！' where id between 13 and 17;
+
+
+show create table user;
+
+alter table user modify bio varchar(500) default '这个人很神秘，什么都没留下！';

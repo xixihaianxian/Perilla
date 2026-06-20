@@ -1,7 +1,12 @@
 import mockDB from '@/mock'
+import instance from './index'
 import type { UserUpdateDTO } from '@/types'
 
 export const userApi = {
+  async getUserInfo() {
+    return instance.get('/user/info')
+  },
+
   async getProfile(userId: string) {
     const user = mockDB.users.get(userId)
     if (!user) throw new Error('用户不存在')
@@ -28,7 +33,21 @@ export const userApi = {
       .map((f) => mockDB.notes.get(f.note_id))
       .filter(Boolean)
       .sort((a, b) => new Date(b!.created_at).getTime() - new Date(a!.created_at).getTime())
-    return mockDB.paginate(notes, page, pageSize)
+    // 取后一半作为"收藏"，与"点赞"做区分
+    const start = Math.ceil(notes.length / 2)
+    const collectedNotes = notes.slice(start)
+    return mockDB.paginate(collectedNotes, page, pageSize)
+  },
+
+  async getUserLikes(userId: string, page = 1, pageSize = 20) {
+    const favs = [...mockDB.favorites.values()].filter((f) => f.user_id === userId)
+    const notes = favs
+      .map((f) => mockDB.notes.get(f.note_id))
+      .filter(Boolean)
+      .sort((a, b) => new Date(b!.created_at).getTime() - new Date(a!.created_at).getTime())
+    // 取前一半作为"点赞"，与"收藏"做区分
+    const likedNotes = notes.slice(0, Math.ceil(notes.length / 2))
+    return mockDB.paginate(likedNotes, page, pageSize)
   },
 
   async getFollowers(userId: string, page = 1, pageSize = 20) {

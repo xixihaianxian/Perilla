@@ -96,11 +96,11 @@ function isActive(path: string): boolean {
       <li v-for="item in navItems" :key="item.path">
         <router-link
           :to="item.requiresAuth && !authStore.isAuthenticated ? '/login' : item.path"
-          class="relative flex items-center gap-3 px-3.5 py-3.5 rounded-[22px] transition-all duration-200 overflow-visible"
+          class="nav-item relative flex items-center gap-3 px-3.5 py-3.5 rounded-[22px] transition-all duration-200 overflow-visible"
           :class="
             isActive(item.path)
-              ? 'bg-bg-secondary text-text-primary font-bold shadow-sm'
-              : 'text-text-secondary hover:text-text-primary hover:bg-bg-secondary/70'
+              ? 'nav-item--active text-text-primary font-bold shadow-sm'
+              : 'nav-item--inactive text-text-secondary hover:text-text-primary'
           "
         >
           <!-- Active left indicator bar -->
@@ -228,6 +228,19 @@ function isActive(path: string): boolean {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* === Nav item background states === */
+.nav-item--active {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.14) 0%, rgba(139, 92, 246, 0.06) 100%);
+}
+
+.nav-item--inactive {
+  background: transparent;
+}
+
+.nav-item--inactive:hover {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(139, 92, 246, 0.03) 100%);
 }
 
 /* === Perilla letter-by-letter roll-in animation === */

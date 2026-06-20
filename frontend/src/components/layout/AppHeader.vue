@@ -200,9 +200,12 @@ function handleLogout() {
 }
 .search-input :deep(.el-input__inner) {
   color: var(--color-text-primary);
+  height: 48px;
+  line-height: 48px;
 }
 .search-input :deep(.el-input__inner::placeholder) {
   color: var(--color-text-tertiary);
+  line-height: 48px;
 }
 .search-submit {
   width: 40px;

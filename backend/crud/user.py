@@ -86,9 +86,11 @@ async def authenticate_user(db:AsyncSession,name_or_email,password)->tuple:
 # 根据token查找用户信息
 async def fetch_user_info_by_token(token:str,db:AsyncSession):
     stmt = select(
-        # recommend.User.id,
         recommend.User.username,
+        recommend.User.nickname,
         recommend.User.avatar,
+        recommend.User.bio,
+        recommend.User.gender,
         user.UserToken.expires_at
     ).join(
         user.UserToken,

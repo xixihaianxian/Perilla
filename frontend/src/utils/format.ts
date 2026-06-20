@@ -49,6 +49,30 @@ export function formatDate(dateStr: string, format = 'zh-CN'): string {
 }
 
 /**
+ * Mask email for privacy display
+ * "johndoe@example.com" → "j***@example.com"
+ */
+export function maskEmail(email: string): string {
+  if (!email) return ''
+  const atIndex = email.indexOf('@')
+  if (atIndex <= 1) {
+    // Single character before @ or no @ — replace all before @ with ***
+    return atIndex > 0 ? `***${email.slice(atIndex)}` : '***'
+  }
+  return email[0] + '***' + email.slice(atIndex)
+}
+
+/**
+ * Mask phone number for privacy display
+ * "13812345678" → "138****5678"
+ */
+export function maskPhone(phone: string): string {
+  if (!phone) return ''
+  if (phone.length < 7) return '***'
+  return phone.slice(0, 3) + '****' + phone.slice(-4)
+}
+
+/**
  * Format date with time
  */
 export function formatDateTime(dateStr: string): string {

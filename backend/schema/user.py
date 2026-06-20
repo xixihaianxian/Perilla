@@ -30,6 +30,19 @@ class UserInfoResponse(UserInfoBase):
         from_attributes=True,
     )
 
+class UserDetailInfo(BaseModel):
+    nickname:str=Field(...,max_length=50)
+    # email:str=Field(...,max_length=100)
+    # phone:str=Field(...,max_length=20)
+    bio:Optional[str]=Field(default=None,max_length=500)
+    gender:int=Field(...,ge=0,le=2)
+    avatar:Optional[str]=Field(default=None,max_length=500)
+    # status:int
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+    )
+
 class UserAuthResponse(BaseModel):
     token:str
     user_info:UserInfoResponse=Field(...,validation_alias="userInfo",serialization_alias="userInfo")
@@ -47,6 +60,7 @@ class UserLoginRequest(BaseModel):
 class UserLoginResponse(BaseModel):
     username:str=Field(...,max_length=50)
     avatar:str=Field(...,max_length=500)
+    nickname:str=Field(...,max_length=50)
     model_config = ConfigDict(
         from_attributes=True,
         populate_by_name=True
@@ -65,4 +79,11 @@ class CurrentUserResponse(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
         populate_by_name=True
+    )
+
+class UserDetailInfoResponse(BaseModel):
+    user_info:UserDetailInfo=Field(...,validation_alias="userInfo",serialization_alias="userInfo")
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
     )
