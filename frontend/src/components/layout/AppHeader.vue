@@ -3,6 +3,7 @@ import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useUIStore } from '@/stores/uiStore'
+import { getAvatarUrl } from '@/utils/avatar'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { useChatStore } from '@/stores/chatStore'
 
@@ -116,7 +117,7 @@ function handleLogout() {
           <el-dropdown trigger="click" placement="bottom-end">
             <button class="flex items-center justify-center w-9 h-9 rounded-full overflow-hidden ring-2 ring-transparent hover:ring-primary/50 transition-all duration-200">
               <img
-                :src="authStore.user?.avatar"
+                :src="getAvatarUrl(authStore.user?.avatar)"
                 :alt="authStore.user?.nickname"
                 class="w-full h-full object-cover"
               />

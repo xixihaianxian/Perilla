@@ -5,6 +5,7 @@ import { adminApi } from '@/api/admin'
 import { ElMessage } from 'element-plus'
 import DataTable from '@/components/admin/DataTable.vue'
 import ReviewStatusBadge from '@/components/admin/ReviewStatusBadge.vue'
+import { getCoverUrl } from '@/utils/cover'
 
 const notes = ref<Note[]>([])
 const loading = ref(false)
@@ -60,7 +61,7 @@ onMounted(() => fetchNotes())
       >
         <template #title="{ row }">
           <div class="flex items-center gap-2">
-            <img :src="row.cover_image" class="w-10 h-10 rounded object-cover shrink-0" />
+            <img :src="getCoverUrl(row.cover_image)" class="w-10 h-10 rounded object-cover shrink-0" />
             <span class="text-sm text-ellipsis-1">{{ row.title }}</span>
           </div>
         </template>

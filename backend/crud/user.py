@@ -154,12 +154,14 @@ async def update_status(token,db:AsyncSession,new_status:int):
     if user_status is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="User does not exist!")
     else:
-        query=update(recommend.User).where(recommend.User.id==user_status.id).values(status=new_status)
+        query=update(recommend.User).where(recommend.User.id==user_status).values(status=new_status)
         result=await db.execute(query)
         if result.rowcount==0:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="Update failed!")
         else:
-            update_user=select(recommend.User).where(recommend.User.id==user_status.id)
+            stmt=select(recommend.User).where(recommend.User.id==user_status)
+            result=await db.execute(stmt)
+            update_user=result.scalar()
             return update_user
 
 if __name__=="__main__":

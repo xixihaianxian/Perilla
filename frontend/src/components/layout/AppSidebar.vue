@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { computed, ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useUIStore } from '@/stores/uiStore'
+import { getAvatarUrl } from '@/utils/avatar'
 
 const route = useRoute()
+const router = useRouter()
 const authStore = useAuthStore()
 const uiStore = useUIStore()
 const showBenefits = ref(false)
+const moreMenuOpen = ref(false)
 
 interface NavItem {
   name: string
@@ -44,6 +47,12 @@ onMounted(() => {
 onUnmounted(() => {
   if (animTimer) clearInterval(animTimer)
 })
+
+function handleLogout() {
+  moreMenuOpen.value = false
+  authStore.logout()
+  router.push('/')
+}
 
 function isActive(path: string): boolean {
   const [basePath, query] = path.split('?')
@@ -190,7 +199,7 @@ function isActive(path: string): boolean {
           class="flex items-center gap-3 rounded-3xl bg-black/35 px-4 py-4 ring-1 ring-white/5 hover:bg-bg-secondary transition-colors"
         >
           <img
-            :src="authStore.user?.avatar"
+            :src="getAvatarUrl(authStore.user?.avatar)"
             class="w-10 h-10 rounded-full object-cover ring-2 ring-bg-tertiary"
           />
           <div class="flex-1 min-w-0">
@@ -199,7 +208,7 @@ function isActive(path: string): boolean {
           </div>
         </router-link>
         <div v-else class="flex justify-center">
-          <img :src="authStore.user?.avatar" class="w-8 h-8 rounded-full object-cover ring-2 ring-bg-tertiary" />
+          <img :src="getAvatarUrl(authStore.user?.avatar)" class="w-8 h-8 rounded-full object-cover ring-2 ring-bg-tertiary" />
         </div>
       </template>
     </div>
@@ -207,10 +216,27 @@ function isActive(path: string): boolean {
     <!-- Bottom links -->
     <div v-if="!collapsed" class="pb-1 pt-5">
       <div class="space-y-3">
-        <a href="#" class="flex items-center gap-3 px-3.5 text-[15px] font-semibold text-text-secondary hover:text-text-primary transition-colors">
-          <el-icon :size="21"><Menu /></el-icon>
-          更多
-        </a>
+        <div class="more-wrap">
+          <a href="#" class="flex items-center gap-3 px-3.5 text-[15px] font-semibold text-text-secondary hover:text-text-primary transition-colors" @click.prevent="moreMenuOpen = !moreMenuOpen">
+            <el-icon :size="21"><Menu /></el-icon>
+            更多
+          </a>
+          <div v-if="moreMenuOpen" class="more-dropdown">
+            <button class="more-item">
+              <el-icon :size="16"><Setting /></el-icon>
+              <span>设置与隐私</span>
+            </button>
+            <button class="more-item">
+              <el-icon :size="16"><QuestionFilled /></el-icon>
+              <span>帮助与反馈</span>
+            </button>
+            <div class="more-divider"></div>
+            <button class="more-item more-item--danger" @click="handleLogout">
+              <el-icon :size="16"><SwitchButton /></el-icon>
+              <span>退出登录</span>
+            </button>
+          </div>
+        </div>
         <a href="#" class="flex items-center gap-3 px-3.5 text-[15px] font-semibold text-text-secondary hover:text-text-primary transition-colors">
           <el-icon :size="21"><InfoFilled /></el-icon>
           关于我们
@@ -268,5 +294,57 @@ function isActive(path: string): boolean {
   display: inline-block;
   opacity: 0;
   animation: perillaRollIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* === "更多" dropdown === */
+.more-wrap {
+  position: relative;
+}
+
+.more-dropdown {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  width: 180px;
+  background: #1E1E24;
+  border: 1px solid #2E2E36;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  padding: 6px;
+  z-index: 100;
+}
+
+.more-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #E4E4E7;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.more-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.more-item--danger {
+  color: #F87171;
+}
+
+.more-item--danger:hover {
+  background: rgba(248, 113, 113, 0.1);
+}
+
+.more-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 4px 0;
 }
 </style>

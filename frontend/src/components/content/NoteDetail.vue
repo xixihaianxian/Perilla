@@ -9,6 +9,7 @@ import ImageCarousel from './ImageCarousel.vue'
 import TagList from './TagList.vue'
 import TopicChip from './TopicChip.vue'
 import ShareButton from './ShareButton.vue'
+import { getCoverUrl } from '@/utils/cover'
 
 interface Props { note: Note }
 const props = defineProps<Props>()
@@ -54,7 +55,7 @@ async function toggleFollow() {
           :images="note.media.map((m) => ({ url: m.url, thumbnail_url: m.thumbnail_url }))"
           height="min(500px, 60vh)"
         />
-        <img v-else :src="note.cover_image" class="w-full object-cover" style="max-height: 60vh" />
+        <img v-else :src="getCoverUrl(note.cover_image)" class="w-full object-cover" style="max-height: 60vh" />
       </div>
 
       <div class="lg:w-[45%] flex flex-col">

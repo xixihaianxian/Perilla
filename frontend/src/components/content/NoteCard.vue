@@ -5,6 +5,7 @@ import type { Note } from '@/types'
 import { useAuthStore } from '@/stores/authStore'
 import { favoriteApi } from '@/api/favorite'
 import { ElMessage } from 'element-plus'
+import { getCoverUrl } from '@/utils/cover'
 
 interface Props {
   note: Note
@@ -65,7 +66,7 @@ async function toggleSave(e: Event) {
   >
     <div class="relative overflow-hidden bg-bg-tertiary">
       <img
-        :src="note.cover_image"
+        :src="getCoverUrl(note.cover_image)"
         :alt="note.title"
         class="w-full object-cover transition-transform duration-500 group-hover/card:scale-105"
         loading="lazy"

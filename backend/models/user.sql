@@ -110,3 +110,28 @@ from status
                                           from user_token
                                           where token = '217af910-22ed-4a70-a316-378c75787021') as id
                                          on id.user_id = user.id) as user_status on user_status.status = status.id;
+
+select * from topic limit 10 offset 0;
+
+select * from topic limit 10 offset 10;
+
+select title from topic order by id;
+
+select * from user;
+
+create procedure rename_cover()
+begin
+    declare i int default 1;
+    while i<=50 do
+        update topic set cover_url=concat_ws('/','covers',concat(i,'.png')) where id=i;
+        set i=i+1;
+        end while;
+end;
+
+call rename_cover();
+
+select * from topic;
+
+show tables ;
+
+select * from topic_media;

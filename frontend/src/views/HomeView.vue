@@ -6,6 +6,8 @@ import { tagApi, type Category } from '@/api/tag'
 import { topicApi, type TopicItem } from '@/api/topic'
 import NoteWaterfall from '@/components/content/NoteWaterfall.vue'
 import TopicDetailDialog, { type TopicDialogData } from '@/components/content/TopicDetailDialog.vue'
+import { getCoverUrl } from '@/utils/cover'
+import { getAvatarUrl } from '@/utils/avatar'
 
 const activeTab = ref<FeedType>('recommended')
 const activeCatId = ref(0) // 0 = "全部"
@@ -63,8 +65,8 @@ async function onCardClick(note: Note) {
     selectedTopic.value = {
       title: detail.title,
       description: detail.content,
-      cover_image: item.cover_url ?? '',
-      avatar: item.avatar,
+      cover_image: getCoverUrl(item.cover_url),
+      avatar: getAvatarUrl(item.avatar),
       username: detail.author,
       bio: detail.bio,
       created_at: detail.publish_time,
@@ -78,8 +80,8 @@ async function onCardClick(note: Note) {
     selectedTopic.value = {
       title: item.title,
       description: item.description ?? '',
-      cover_image: item.cover_url ?? '',
-      avatar: item.avatar,
+      cover_image: getCoverUrl(item.cover_url),
+      avatar: getAvatarUrl(item.avatar),
       username: item.username,
       bio: '',
       created_at: item.created_at,
@@ -96,7 +98,7 @@ function topicToNote(item: TopicItem): Note {
     user_id: String(item.author_id ?? ''),
     title: item.title,
     content: item.description ?? '',
-    cover_image: item.cover_url ?? '',
+    cover_image: getCoverUrl(item.cover_url),
     status: 'published',
     view_count: 0,
     like_count: 0,
@@ -108,7 +110,7 @@ function topicToNote(item: TopicItem): Note {
     author: {
       id: String(item.author_id ?? ''),
       nickname: item.username,
-      avatar: item.avatar,
+      avatar: getAvatarUrl(item.avatar),
       email: '',
       phone: '',
       bio: '',

@@ -6,6 +6,7 @@ import type { StatusItem } from '@/api/user'
 import type { Note } from '@/types'
 import { useRouter } from 'vue-router'
 import NoteWaterfall from '@/components/content/NoteWaterfall.vue'
+import { getAvatarUrl } from '@/utils/avatar'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -141,9 +142,16 @@ async function fetchStatusList() {
   } catch { /* ignore */ }
 }
 
-function selectStatus(statusId: number | null) {
+async function selectStatus(statusId: number) {
+  const prevStatus = profileStatus.value
   profileStatus.value = statusId
   statusPickerVisible.value = false
+  try {
+    await userApi.updateStatus(statusId)
+  } catch {
+    // 请求失败恢复原值
+    profileStatus.value = prevStatus
+  }
 }
 
 onMounted(async () => {
@@ -180,7 +188,7 @@ function handleLogout() { authStore.logout(); router.push('/') }
     <div class="me-card">
       <div class="me-profile-header">
         <div class="me-avatar-wrap">
-          <img v-if="authStore.user?.avatar" :src="authStore.user.avatar" class="me-avatar" />
+          <img v-if="authStore.user?.avatar" :src="getAvatarUrl(authStore.user.avatar)" class="me-avatar" />
           <div v-else class="me-avatar me-avatar--empty" />
         </div>
         <div class="me-header-info">
@@ -274,6 +282,7 @@ function handleLogout() { authStore.logout(); router.push('/') }
     <div class="me-logout-zone">
       <button class="me-logout-link" @click="handleLogout">退出登录</button>
     </div>
+
   </div>
 </template>
 
@@ -295,7 +304,7 @@ function handleLogout() { authStore.logout(); router.push('/') }
    ========================================== */
 .me-profile-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 24px;
 }
 
@@ -492,10 +501,7 @@ function handleLogout() { authStore.logout(); router.push('/') }
 .me-logout-link:hover {
   color: #F87171;
 }
-</style>
 
-<!-- 非 scoped 样式：popover 需要全局覆盖 -->
-<style>
 .me-status-picker-popper {
   background: #1E1E24 !important;
   border: 1px solid #2E2E36 !important;
@@ -535,6 +541,46 @@ function handleLogout() { authStore.logout(); router.push('/') }
   background: rgba(139, 92, 246, 0.15);
 }
 
+.status-picker-icon {
+  width: 36px;
+  height: 36px;
+}
+</style>
+
+<style>
+.me-status-picker-popper {
+  background: #1E1E24 !important;
+  border: 1px solid #2E2E36 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5) !important;
+  padding: 8px !important;
+}
+.me-status-picker-popper .el-popper__arrow::before {
+  background: #1E1E24 !important;
+  border-color: #2E2E36 !important;
+}
+.status-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.status-picker-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 2px solid transparent;
+}
+.status-picker-item:hover {
+  background: rgba(139, 92, 246, 0.1);
+}
+.status-picker-item.selected {
+  border-color: #8B5CF6;
+  background: rgba(139, 92, 246, 0.15);
+}
 .status-picker-icon {
   width: 36px;
   height: 36px;

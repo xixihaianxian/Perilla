@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { getAvatarUrl } from '@/utils/avatar'
+
 interface Props {
   src: string
   alt?: string
@@ -22,12 +25,13 @@ const sizeMap: Record<string, number> = {
 }
 
 const sizePx = typeof props.size === 'number' ? props.size : sizeMap[props.size] || 40
+const normalizedSrc = computed(() => getAvatarUrl(props.src))
 </script>
 
 <template>
   <div class="relative inline-flex shrink-0" :style="{ width: `${sizePx}px`, height: `${sizePx}px` }">
     <img
-      :src="src"
+      :src="normalizedSrc"
       :alt="alt"
       class="w-full h-full object-cover rounded-full bg-bg-tertiary"
     />

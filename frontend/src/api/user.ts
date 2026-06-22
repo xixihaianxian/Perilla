@@ -13,6 +13,10 @@ export const userApi = {
     return res.data.data || []
   },
 
+  async updateStatus(statusId: number) {
+    return instance.patch(`/user/update/status?user_status=${statusId}`)
+  },
+
   async getUserInfo() {
     return instance.get('/user/info')
   },
