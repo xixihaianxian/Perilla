@@ -1,4 +1,4 @@
-from sqlalchemy import Integer,DateTime,func,String,BigInteger,SmallInteger,Date,ForeignKey,Index,Enum
+from sqlalchemy import Integer,DateTime,func,String,BigInteger,SmallInteger,Date,ForeignKey,Index,Enum,Null
 from sqlalchemy.orm import DeclarativeBase,mapped_column,Mapped
 from datetime import datetime
 from typing import Optional
@@ -28,7 +28,7 @@ class User(Base,TimestampMixin):
     bio: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     gender: Mapped[int] = mapped_column(SmallInteger, default=0)
     birthday: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
-    status: Mapped[int] = mapped_column(SmallInteger, default=1)
+    status: Mapped[int] = mapped_column(Integer, ForeignKey(column="status.id",ondelete="SET NULL",onupdate="CASCADE"),default=Null,nullable=True)
     last_login_time: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
     def __repr__(self):

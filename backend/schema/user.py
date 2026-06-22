@@ -37,7 +37,7 @@ class UserDetailInfo(BaseModel):
     bio:Optional[str]=Field(default=None,max_length=500)
     gender:int=Field(...,ge=0,le=2)
     avatar:Optional[str]=Field(default=None,max_length=500)
-    # status:int
+    status:Optional[int]=Field(default=None)
     model_config = ConfigDict(
         from_attributes=True,
         populate_by_name=True,
@@ -87,3 +87,17 @@ class UserDetailInfoResponse(BaseModel):
         from_attributes=True,
         populate_by_name=True,
     )
+
+# class UserSatus(BaseModel):
+#     status:Optional[int]=Field(default=None)
+#     model_config = ConfigDict(
+#         from_attributes=True,
+#         populate_by_name=True,
+#     )
+#
+# class UserStatusInfoResponse(BaseModel):
+#     user_info:UserSatus=Field(...,validation_alias="userInfo",serialization_alias="userInfo")
+#     model_config = ConfigDict(
+#         from_attributes=True,
+#         populate_by_name=True,
+#     )

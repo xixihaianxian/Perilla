@@ -43,14 +43,70 @@ select * from user;
 
 select user_id from user_token where token='217af910-22ed-4a70-a316-378c75787021';
 
-select user.id, username, user.avatar
+select user.id, username, user.avatar,status
 from user
          inner join (select user_id from user_token where token = '217af910-22ed-4a70-a316-378c75787021') as id
                     on id.user_id = user.id;
 
 update user set bio='这个人很神秘，什么都没留下！' where id between 13 and 17;
 
-
 show create table user;
 
 alter table user modify bio varchar(500) default '这个人很神秘，什么都没留下！';
+
+alter table user modify status int default null;
+
+create table status(
+    id int auto_increment primary key ,
+    name varchar(10) not null
+);
+
+drop table status;
+
+INSERT INTO status (name) VALUES
+('放松'),
+('兴奋'),
+('开怀'),
+('大笑'),
+('美妙'),
+('不悦'),
+('调皮'),
+('质疑'),
+('小狗'),
+('愉悦'),
+('放松'),
+('友好'),
+('高兴'),
+('自信'),
+('自豪'),
+('美妙'),
+('大笑'),
+('开怀'),
+('微笑'),
+('咀嚼'),
+('疑惑'),
+('男士'),
+('女士'),
+('开心'),
+('友好');
+
+alter table user add constraint fk_user_status foreign key user(status) references status(id) on delete set null on update cascade ;
+
+show tables ;
+
+select * from status;
+
+show create table user;
+
+update user set status=null where username='Aime';
+
+select * from user;
+
+select name,user_status.status
+from status
+         right join(select status
+                     from user
+                              inner join (select user_id
+                                          from user_token
+                                          where token = '217af910-22ed-4a70-a316-378c75787021') as id
+                                         on id.user_id = user.id) as user_status on user_status.status = status.id;

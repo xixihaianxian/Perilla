@@ -13,6 +13,9 @@ interface Props {
   hasMore?: boolean
   emptyText?: string
   emptyType?: 'generic' | 'notes' | 'search' | 'following'
+  emptyShowCta?: boolean
+  emptyCtaText?: string
+  emptyCtaLink?: string
   clickMode?: 'navigate' | 'emit'
 }
 
@@ -21,6 +24,9 @@ const props = withDefaults(defineProps<Props>(), {
   hasMore: true,
   emptyText: '暂无内容',
   emptyType: 'notes',
+  emptyShowCta: false,
+  emptyCtaText: '去探索',
+  emptyCtaLink: '/explore',
   clickMode: 'navigate',
 })
 
@@ -78,6 +84,9 @@ const { sentinelRef } = useInfiniteScroll(
       v-else-if="!loading && notes.length === 0"
       :type="emptyType"
       :description="emptyText"
+      :show-cta="emptyShowCta"
+      :cta-text="emptyCtaText"
+      :cta-link="emptyCtaLink"
     />
 
     <!-- Waterfall grid -->

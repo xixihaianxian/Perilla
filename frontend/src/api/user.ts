@@ -2,7 +2,17 @@ import mockDB from '@/mock'
 import instance from './index'
 import type { UserUpdateDTO } from '@/types'
 
+export interface StatusItem {
+  id: number
+  name: string
+}
+
 export const userApi = {
+  async getStatusList(): Promise<StatusItem[]> {
+    const res = await instance.get('/user/status')
+    return res.data.data || []
+  },
+
   async getUserInfo() {
     return instance.get('/user/info')
   },

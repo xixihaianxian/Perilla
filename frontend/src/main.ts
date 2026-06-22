@@ -8,6 +8,7 @@ import router from './router'
 import './assets/styles/tailwind.css'
 import './assets/styles/global.css'
 import '../font_3vy41nisjyb/iconfont.js'
+import '../font_6a6ri7ajqgq/iconfont.js'
 
 const app = createApp(App)
 const pinia = createPinia()

@@ -1,5 +1,5 @@
 from sqlalchemy.orm import DeclarativeBase,Mapped,mapped_column,relationship
-from sqlalchemy import BigInteger,ForeignKey,String,DateTime,func,Index
+from sqlalchemy import BigInteger,ForeignKey,String,DateTime,func,Index,Integer
 from typing import Optional
 from datetime import datetime
 from utils.table_base import Base
@@ -34,3 +34,12 @@ class UserToken(Base):
     __table_args__ = (
         Index('idx_user_id', 'user_id'),
     )
+
+class Status(Base):
+    __tablename__ = 'status'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(10), nullable=False)
+
+    def __repr__(self):
+        return f"<Status(id={self.id}, name={self.name})>"

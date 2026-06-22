@@ -2,7 +2,7 @@ from fastapi import APIRouter,Depends,status
 from config import database_config
 from sqlalchemy.ext.asyncio import AsyncSession
 from schema.user import UserRequest,UserAuthResponse,UserInfoResponse,UserLoginRequest,UserLoginResponse,UserLoginAuthResponse,CurrentUserResponse,UserDetailInfo,UserDetailInfoResponse
-from crud.user import get_user_by_name,create_user,create_token,authenticate_user,fetch_user_info_by_token
+from crud.user import get_user_by_name,create_user,create_token,authenticate_user,fetch_user_info_by_token,get_status
 from fastapi.exceptions import HTTPException
 import uuid
 from utils import response
@@ -73,6 +73,14 @@ async def get_user_info(token:OAuth2PasswordBearer=Depends(oauth2_scheme),db:Asy
         response_data=UserDetailInfo.model_validate(user_info)
         return response.success_response(data=UserDetailInfoResponse(user_info=response_data))
 
+@router.get("/status")
+async def get_user_status(db:AsyncSession=Depends(database_config.get_session_orm)):
+    user_status=await get_status(db=db)
+    if user_status is not None:
+        return response.success_response(data=user_status)
+    else:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Please log in again!")
+
 @router.patch("/update")
-async def update_user_info():
+async def update_user_status(user_status:int,token:OAuth2PasswordBearer=Depends(oauth2_scheme),db:AsyncSession=Depends(database_config.get_session_orm)):
     pass

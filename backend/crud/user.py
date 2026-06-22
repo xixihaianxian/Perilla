@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select,update
 from sqlalchemy.ext.asyncio import AsyncSession
 from models import recommend,user
 from schema.user import UserRequest
@@ -7,6 +7,12 @@ from datetime import datetime,timedelta
 from config.setting import AvatarSetting
 import os
 import random
+import json
+from pathlib import Path
+import re
+import asyncio
+from fastapi.exceptions import HTTPException
+from fastapi import status
 
 # 根据用户名获取用户
 async def get_user_by_name(username:str,db:AsyncSession):
@@ -91,6 +97,7 @@ async def fetch_user_info_by_token(token:str,db:AsyncSession):
         recommend.User.avatar,
         recommend.User.bio,
         recommend.User.gender,
+        recommend.User.status,
         user.UserToken.expires_at
     ).join(
         user.UserToken,
@@ -107,5 +114,55 @@ async def fetch_user_info_by_token(token:str,db:AsyncSession):
     else:
         return user_info
 
+async def fetch_status():
+    iconfont_path=Path(__file__).resolve().parent.parent/"config"/"iconfont.json"
+    status=list()
+    pattern = re.compile(r"163_(.*)")
+    if iconfont_path.exists():
+        with open(iconfont_path,"r",encoding="utf-8") as file:
+            iconfont=json.load(file)
+        glyphs=iconfont.get("glyphs")
+        for glyph in glyphs:
+            name=glyph.get("name")
+            result=re.search(pattern=pattern,string=name)
+            if result:
+                statu=result.group(1)
+                status.append(statu)
+        return status
+    else:
+        return None
+
+async def get_status(db:AsyncSession):
+    stmt=select(user.Status)
+    result=await db.execute(stmt)
+    status=result.scalars().all()
+    return status
+
+# 更新用户数据
+async def update_status(token,db:AsyncSession,new_status:int):
+    stmt = select(
+        recommend.User.id,
+        recommend.User.status,
+    ).join(
+        user.UserToken,
+        user.UserToken.user_id == recommend.User.id
+    ).where(
+        user.UserToken.token == token
+    )
+    result=await db.execute(stmt)
+    user_status=result.scalar_one_or_none()
+    if user_status is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="User does not exist!")
+    else:
+        query=update(recommend.User).where(recommend.User.id==user_status.id).values(status=new_status)
+        result=await db.execute(query)
+        if result.rowcount==0:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="Update failed!")
+        else:
+            update_user=select(recommend.User).where(recommend.User.id==user_status.id)
+            return update_user
+
 if __name__=="__main__":
+    # status=asyncio.run(fetch_status())
+    # print(status)
     pass
