@@ -195,6 +195,29 @@ async def update_information(token,db:AsyncSession,new_information:pydantic.Base
             user_info=result.first()
             return user_info
 
+# 根据token获取用户的账号信息
+async def fetch_account_info_by_token(token,db:AsyncSession):
+    stmt=select(
+        recommend.User.username,
+        recommend.User.email,
+        recommend.User.phone,
+        user.UserToken.expires_at,
+    ).join(
+        user.UserToken,
+        user.UserToken.user_id==recommend.User.id
+    ).where(
+        user.UserToken.token==token
+    )
+    result=await db.execute(stmt)
+    account_info=result.first()
+    if account_info is None:
+        return None
+    else:
+        if datetime.now()>account_info.expires_at:
+            return None
+        else:
+            return account_info
+
 if __name__=="__main__":
     # status=asyncio.run(fetch_status())
     # print(status)

@@ -25,6 +25,10 @@ export const userApi = {
     return instance.get('/user/get/information')
   },
 
+  async getAccountInfo() {
+    return instance.get('/user/get/account/info')
+  },
+
   async updateInformation(data: {
     nickname: string
     bio: string

@@ -30,6 +30,21 @@ function handleFormKeydown(e: KeyboardEvent) {
   }
 }
 
+// 任何输入框获得焦点（点击 / Tab / 方向键）时播放选中脉冲
+function handleFormFocusin(e: FocusEvent) {
+  const target = e.target as HTMLElement
+  if (target?.tagName === 'INPUT') triggerSelectPulse(target)
+}
+
+function triggerSelectPulse(input: HTMLElement | undefined) {
+  const el = input?.closest('.el-input') as HTMLElement | null
+  if (!el) return
+  el.classList.remove('kbd-selected')
+  void el.offsetWidth // 强制 reflow，确保动画重新播放
+  el.classList.add('kbd-selected')
+  el.addEventListener('animationend', () => el.classList.remove('kbd-selected'), { once: true })
+}
+
 async function handleLogin() {
   if (!form.username || !form.password) { error.value = '请输入用户名和密码'; return }
   loading.value = true; error.value = ''
@@ -124,7 +139,7 @@ async function handleLogin() {
           <p class="login-card__form-subtitle">还没有账号？<router-link to="/register">立即注册</router-link></p>
         </div>
 
-        <form class="login-card__form" @submit.prevent="handleLogin" @keydown="handleFormKeydown">
+        <form class="login-card__form" @submit.prevent="handleLogin" @keydown="handleFormKeydown" @focusin="handleFormFocusin">
           <el-input v-model="form.username" placeholder="用户名或邮箱" size="large" clearable :prefix-icon="User" />
           <el-input v-model="form.password" type="password" placeholder="密码" size="large" show-password :prefix-icon="Lock" />
 
@@ -389,6 +404,23 @@ async function handleLogin() {
   background: rgba(255, 255, 255, 0.06) !important;
   border-color: #8B5CF6 !important;
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12), inset 0 0 0 1px rgba(139, 92, 246, 0.1) !important;
+}
+
+/* 方向键 ↑/↓ 切换输入框时播放一次紫色发光脉冲（由 JS 添加 .kbd-selected 类触发） */
+:deep(.el-input.kbd-selected) {
+  position: relative;
+}
+:deep(.el-input.kbd-selected)::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 12px;
+  pointer-events: none;
+  animation: kbd-select-pulse 0.55s ease-out;
+}
+@keyframes kbd-select-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7); }
+  100% { box-shadow: 0 0 10px 12px rgba(139, 92, 246, 0); }
 }
 :deep(.el-input__inner) {
   color: #E4E4E7 !important;

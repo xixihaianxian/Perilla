@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref, computed, onMounted } from 'vue'
+import { reactive, ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
@@ -105,6 +105,10 @@ const savingProfile = ref(false)
 const savingAccount = ref(false)
 const savingPassword = ref(false)
 
+// 账号信息：懒加载状态（进入 tab 时才拉取，且只拉一次）
+const accountLoaded = ref(false)
+const loadingAccount = ref(false)
+
 // ==========================================
 // 性别胶囊选择器（与 RegisterView 一致）
 // ==========================================
@@ -173,6 +177,44 @@ onMounted(async () => {
   } finally {
     // 以最终填充值作为「未改动」基线
     snapshotProfile()
+  }
+})
+
+// ==========================================
+// 账号信息：进入 tab 时拉取 /user/get/account/info 填充三个框
+// 返回结构：{ code, message, data: { token, userInfo: { username, email, phone } } }
+// ==========================================
+async function loadAccountInfo() {
+  loadingAccount.value = true
+  try {
+    const res = await userApi.getAccountInfo()
+    const body = res.data
+    const info = body.data?.userInfo ?? body.data?.UserInfo ?? body.data
+    if (body.code === 200 && info) {
+      if (info.username !== undefined && info.username !== null) accountForm.username = info.username
+      if (info.email !== undefined && info.email !== null) accountForm.email = info.email
+      if (info.phone !== undefined && info.phone !== null) accountForm.phone = info.phone
+      // 与 onMounted 一致：回写 store，便于其他页面复用
+      if (authStore.user) {
+        Object.assign(authStore.user as any, {
+          username: accountForm.username,
+          email: accountForm.email,
+          phone: accountForm.phone,
+        })
+      }
+    }
+  } catch {
+    /* 静默：保留现值，避免接口异常时清空用户输入 */
+  } finally {
+    accountLoaded.value = true
+    loadingAccount.value = false
+  }
+}
+
+// 懒加载：首次切到「账号信息」tab 时拉取（默认 tab 为 profile，watch 即可覆盖）
+watch(activeTab, (tab) => {
+  if (tab === 'account' && !accountLoaded.value) {
+    loadAccountInfo()
   }
 })
 
@@ -426,7 +468,7 @@ function goBack() {
         </div>
 
         <!-- ============ 账号信息 ============ -->
-        <div v-if="activeTab === 'account'" class="settings-section">
+        <div v-if="activeTab === 'account'" v-loading="loadingAccount" class="settings-section">
           <div class="settings-section-head">
             <h2>账号信息</h2>
             <p>用户名是登录凭证，建议不要频繁修改</p>

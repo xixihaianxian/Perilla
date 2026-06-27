@@ -1,8 +1,10 @@
 from fastapi import APIRouter,Depends,status
 from config import database_config
 from sqlalchemy.ext.asyncio import AsyncSession
-from schema.user import UserRequest,UserAuthResponse,UserInfoResponse,UserLoginRequest,UserLoginResponse,UserLoginAuthResponse,CurrentUserResponse,UserDetailInfo,UserDetailInfoResponse,UserInformation,UserInformationResponse
-from crud.user import get_user_by_name,create_user,create_token,authenticate_user,fetch_user_info_by_token,get_status,update_status,update_information
+from schema.user import (UserRequest,UserAuthResponse,UserInfoResponse,UserLoginRequest,UserLoginResponse,UserLoginAuthResponse,CurrentUserResponse,UserDetailInfo,
+                         UserDetailInfoResponse,UserInformation,UserInformationResponse,UserAccountInfo,UserAccountInfoResponse)
+from crud.user import (get_user_by_name,create_user,create_token,authenticate_user,
+                       fetch_user_info_by_token,get_status,update_status,update_information,fetch_account_info_by_token)
 from fastapi.exceptions import HTTPException
 import uuid
 from utils import response
@@ -112,7 +114,14 @@ async def update_user_information(user_information:UserInformation,token:OAuth2P
 
 # 获取账户信息
 @router.get("/get/account/info")
-async def get_account_info():
-    pass
+async def get_account_info(token:OAuth2PasswordBearer=Depends(oauth2_scheme),db:AsyncSession=Depends(database_config.get_session_orm)):
+    user_info=await fetch_account_info_by_token(token=token,db=db)
+    if user_info is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Please log in again!")
+    else:
+        account_data=UserAccountInfo.model_validate(user_info)
+        return response.success_response(
+            data=UserAccountInfoResponse(token=token,user_info=account_data)
+        )
 
 # 更新账户信息
