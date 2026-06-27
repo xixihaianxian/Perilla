@@ -13,6 +13,7 @@ import re
 import asyncio
 from fastapi.exceptions import HTTPException
 from fastapi import status
+import pydantic
 
 # 根据用户名获取用户
 async def get_user_by_name(username:str,db:AsyncSession):
@@ -98,7 +99,8 @@ async def fetch_user_info_by_token(token:str,db:AsyncSession):
         recommend.User.bio,
         recommend.User.gender,
         recommend.User.status,
-        user.UserToken.expires_at
+        user.UserToken.expires_at,
+        recommend.User.birthday,
     ).join(
         user.UserToken,
         user.UserToken.user_id == recommend.User.id
@@ -138,11 +140,10 @@ async def get_status(db:AsyncSession):
     status=result.scalars().all()
     return status
 
-# 更新用户数据
+# 更新用户状态
 async def update_status(token,db:AsyncSession,new_status:int):
     stmt = select(
         recommend.User.id,
-        recommend.User.status,
     ).join(
         user.UserToken,
         user.UserToken.user_id == recommend.User.id
@@ -163,6 +164,36 @@ async def update_status(token,db:AsyncSession,new_status:int):
             result=await db.execute(stmt)
             update_user=result.scalar()
             return update_user
+
+# 更新用户资料
+async def update_information(token,db:AsyncSession,new_information:pydantic.BaseModel):
+    stmt=select(recommend.User.id).join(
+        user.UserToken,user.UserToken.user_id==recommend.User.id
+    ).where(
+        user.UserToken.token==token
+    )
+    result=await db.execute(stmt)
+    user_info=result.scalar_one_or_none()
+    if user_info is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="User does not exist!")
+    else:
+        query=update(recommend.User).where(recommend.User.id==user_info).values(**new_information.model_dump())
+        result=await db.execute(query)
+        await db.commit()
+        if result.rowcount==0:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="Update failed!")
+        else:
+            stmt=select(
+                recommend.User.nickname,
+                recommend.User.bio,
+                recommend.User.gender,
+                recommend.User.birthday,
+            ).where(
+                recommend.User.id==user_info
+            )
+            result=await db.execute(stmt)
+            user_info=result.first()
+            return user_info
 
 if __name__=="__main__":
     # status=asyncio.run(fetch_status())

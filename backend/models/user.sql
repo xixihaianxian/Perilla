@@ -135,3 +135,5 @@ select * from topic;
 show tables ;
 
 select * from topic_media;
+
+show create table user;

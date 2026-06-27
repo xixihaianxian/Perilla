@@ -1,5 +1,6 @@
 from pydantic import BaseModel,Field,ConfigDict
 from typing import Optional
+from datetime import date
 
 # 用户注册时需要填写的信息
 class UserRequest(BaseModel):
@@ -101,3 +102,40 @@ class UserDetailInfoResponse(BaseModel):
 #         from_attributes=True,
 #         populate_by_name=True,
 #     )
+
+# 用户资料信息
+class UserInformation(BaseModel):
+    nickname:str=Field(max_length=50)
+    bio:str=Field(max_length=500)
+    gender:int=Field(ge=0,le=2)
+    birthday:date
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+    )
+
+class UserInformationResponse(BaseModel):
+    token:str
+    user_info:UserInformation=Field(...,validation_alias="userInfo",serialization_alias="userInfo")
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+    )
+
+# 用户账号信息
+class UserAccountInfo(BaseModel):
+    username:str=Field(max_length=50)
+    email:str=Field(max_length=100)
+    phone:str=Field(max_length=20)
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+    )
+
+class UserAccountInfoResponse(BaseModel):
+    token:str
+    user_info:UserAccountInfo=Field(...,validation_alias="userInfo",serialization_alias="userInfo")
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+    )

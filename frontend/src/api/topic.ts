@@ -75,11 +75,23 @@ export const topicApi = {
     return res.data.data
   },
 
-  /** GET /api/recommend/topic/media */
+  /** GET /api/recommend/topic/media
+   *  后端返回的是相对路径数组（如 "notes\\1\\1.png"），这里统一拼成可访问的静态资源 URL。
+   */
   async getTopicMedia(topicId: number): Promise<string[]> {
     const res = await instance.get<{ data: string[] }>('/recommend/topic/media', {
       params: { topic_id: topicId },
     })
-    return res.data.data
+    const list = res.data?.data ?? []
+    return list.map(normalizeStaticPath).filter((url): url is string => !!url)
   },
+}
+
+/** 把后端返回的相对路径（可能含反斜杠）规范化为 /static/xxx/yyy.png */
+function normalizeStaticPath(raw: string): string {
+  if (!raw) return ''
+  // 已经是完整 URL 或绝对路径，原样返回
+  if (/^https?:\/\//i.test(raw) || raw.startsWith('/')) return raw
+  const normalized = raw.replace(/\\+/g, '/').replace(/^\/+/, '')
+  return `/static/${normalized}`
 }

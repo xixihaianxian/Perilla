@@ -21,6 +21,19 @@ export const userApi = {
     return instance.get('/user/info')
   },
 
+  async getUserInformation() {
+    return instance.get('/user/get/information')
+  },
+
+  async updateInformation(data: {
+    nickname: string
+    bio: string
+    gender: number
+    birthday: string
+  }) {
+    return instance.patch('/user/update/information', data)
+  },
+
   async getProfile(userId: string) {
     const user = mockDB.users.get(userId)
     if (!user) throw new Error('用户不存在')

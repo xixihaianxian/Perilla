@@ -77,6 +77,12 @@ const routes: RouteRecordRaw[] = [
     meta: { layout: 'default', title: '个人中心', requiresAuth: true },
   },
   {
+    path: '/settings',
+    name: 'Settings',
+    component: () => import('@/views/SettingsView.vue'),
+    meta: { layout: 'default', title: '设置与隐私', requiresAuth: true },
+  },
+  {
     path: '/admin',
     name: 'AdminDashboard',
     component: () => import('@/views/admin/AdminDashboard.vue'),

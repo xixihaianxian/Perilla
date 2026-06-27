@@ -58,7 +58,7 @@ function closeMobileSidebar() {
       <!-- Desktop sidebar -->
       <aside
         v-if="showSidebar"
-        class="hidden md:block fixed left-0 top-0 bottom-0 transition-all duration-300 bg-[#141418] z-40"
+        class="sidebar-shell hidden md:block fixed left-0 top-0 bottom-0 overflow-x-hidden bg-[#141418] z-40"
         :class="uiStore.sidebarCollapsed ? 'w-[68px]' : 'w-[244px]'"
       >
         <AppSidebar />
@@ -66,7 +66,7 @@ function closeMobileSidebar() {
 
       <!-- Main content -->
       <main
-        class="flex-1 min-h-screen pt-14 md:pt-[132px] transition-all duration-300"
+        class="main-shell flex-1 min-h-screen pt-14 md:pt-[132px]"
         :class="{
           'md:ml-[244px]': showSidebar && !uiStore.sidebarCollapsed,
           'md:ml-[68px]': showSidebar && uiStore.sidebarCollapsed,
@@ -82,3 +82,13 @@ function closeMobileSidebar() {
     <MobileNav v-if="showSidebar" />
   </div>
 </template>
+
+<style scoped>
+.sidebar-shell {
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.main-shell {
+  transition: margin-left 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+</style>

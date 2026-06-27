@@ -43,7 +43,7 @@ function handleLogout() {
 
 <template>
   <header
-    class="fixed top-0 left-0 right-0 h-14 md:h-[116px] z-50 transition-all duration-300"
+    class="app-header fixed top-0 left-0 right-0 h-14 md:h-[116px] z-50"
     :class="[desktopOffsetClass, scrolled ? 'md:bg-[#1A1A1F]/88 md:backdrop-blur-xl' : 'md:bg-transparent']"
   >
     <div
@@ -178,6 +178,10 @@ function handleLogout() {
 </template>
 
 <style scoped>
+.app-header {
+  transition: left 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 .desktop-search {
   width: min(760px, calc(100vw - 420px));
   filter: drop-shadow(0 18px 44px rgba(0, 0, 0, 0.32));
