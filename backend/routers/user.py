@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from schema.user import (UserRequest,UserAuthResponse,UserInfoResponse,UserLoginRequest,UserLoginResponse,UserLoginAuthResponse,CurrentUserResponse,UserDetailInfo,
                          UserDetailInfoResponse,UserInformation,UserInformationResponse,UserAccountInfo,UserAccountInfoResponse)
 from crud.user import (get_user_by_name,create_user,create_token,authenticate_user,
-                       fetch_user_info_by_token,get_status,update_status,update_information,fetch_account_info_by_token)
+                       fetch_user_info_by_token,get_status,update_status,update_information,fetch_account_info_by_token,update_account_info_by_token)
 from fastapi.exceptions import HTTPException
 import uuid
 from utils import response
@@ -125,3 +125,13 @@ async def get_account_info(token:OAuth2PasswordBearer=Depends(oauth2_scheme),db:
         )
 
 # 更新账户信息
+@router.patch("/update/account/info")
+async def update_account_info(account_info:UserAccountInfo,db:AsyncSession=Depends(database_config.get_session_orm),token:OAuth2PasswordBearer=Depends(oauth2_scheme)):
+    account_info=await update_account_info_by_token(token=token,db=db,account_info=account_info)
+    response_data=UserAccountInfo.model_validate(account_info)
+    return response.success_response(
+        data=UserAccountInfoResponse(
+            token=token,
+            user_info=response_data,
+        )
+    )

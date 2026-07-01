@@ -38,6 +38,10 @@ export const userApi = {
     return instance.patch('/user/update/information', data)
   },
 
+  async updateAccountInfo(data: { username: string; email: string; phone: string }) {
+    return instance.patch('/user/update/account/info', data)
+  },
+
   async getProfile(userId: string) {
     const user = mockDB.users.get(userId)
     if (!user) throw new Error('用户不存在')

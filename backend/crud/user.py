@@ -218,6 +218,41 @@ async def fetch_account_info_by_token(token,db:AsyncSession):
         else:
             return account_info
 
+# 更新账号信息
+async def update_account_info_by_token(token,db:AsyncSession,account_info:pydantic.BaseModel):
+    stmt=select(
+        recommend.User.id
+    ).join(
+        user.UserToken,
+        user.UserToken.user_id==recommend.User.id
+    ).where(
+        user.UserToken.token==token
+    )
+    result=await db.execute(stmt)
+    user_id=result.scalar()
+    if user_id is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="User does not exist!")
+    else:
+        query=update(recommend.User).where(recommend.User.id==user_id).values(**account_info.model_dump())
+        result=await db.execute(query)
+        await db.commit()
+        if result.rowcount==0:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="Update failed!")
+        else:
+            stmt = select(
+                recommend.User.username,
+                recommend.User.email,
+                recommend.User.phone,
+            ).join(
+                user.UserToken,
+                user.UserToken.user_id == recommend.User.id
+            ).where(
+                user.UserToken.token == token
+            )
+            result=await db.execute(stmt)
+            account_info=result.first()
+            return account_info
+
 if __name__=="__main__":
     # status=asyncio.run(fetch_status())
     # print(status)

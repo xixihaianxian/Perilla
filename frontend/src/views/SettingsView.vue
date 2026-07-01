@@ -18,20 +18,6 @@ import { useAuthStore } from '@/stores/authStore'
 import { userApi } from '@/api/user'
 import { getAvatarUrl } from '@/utils/avatar'
 
-// ==========================================
-// 类型扩展：项目里 User 类型暂时没有 phone / birthday 等字段
-// 通过 Partial<Record<...>> 局部对齐，避免 TS 报错；保存时再用 cast 写回 authStore
-// ==========================================
-type LocalUserPatch = Partial<{
-  username: string
-  nickname: string
-  email: string
-  phone: string
-  bio: string
-  gender: number
-  birthday: string | null
-}>
-
 const router = useRouter()
 const authStore = useAuthStore()
 
@@ -86,6 +72,24 @@ function isProfileDirty(): boolean {
     profileForm.bio.trim() !== b.bio.trim() ||
     profileForm.gender !== b.gender ||
     (profileForm.birthday || '') !== (b.birthday || '')
+  )
+}
+
+// 账号信息：同样记录加载时的原始值作为基线，用于判断是否有改动
+const accountBaseline = ref({ username: '', email: '', phone: '' })
+function snapshotAccount() {
+  accountBaseline.value = {
+    username: accountForm.username,
+    email: accountForm.email,
+    phone: accountForm.phone,
+  }
+}
+function isAccountDirty(): boolean {
+  const b = accountBaseline.value
+  return (
+    accountForm.username.trim() !== b.username.trim() ||
+    accountForm.email.trim() !== b.email.trim() ||
+    accountForm.phone.trim() !== b.phone.trim()
   )
 }
 
@@ -177,6 +181,7 @@ onMounted(async () => {
   } finally {
     // 以最终填充值作为「未改动」基线
     snapshotProfile()
+    snapshotAccount()
   }
 })
 
@@ -208,6 +213,8 @@ async function loadAccountInfo() {
   } finally {
     accountLoaded.value = true
     loadingAccount.value = false
+    // 拉取到权威值后以其为「未改动」基线
+    snapshotAccount()
   }
 }
 
@@ -299,22 +306,36 @@ async function handleSaveProfile() {
 }
 
 async function handleSaveAccount() {
+  if (!isAccountDirty()) {
+    ElMessage.warning('你没有进行任何修改')
+    return
+  }
   if (!validateAccount()) {
     ElMessage.warning('请检查表单：邮箱或手机号格式不正确')
     return
   }
   savingAccount.value = true
   try {
-    const patch: LocalUserPatch = {
+    const payload = {
       username: accountForm.username.trim(),
       email: accountForm.email.trim(),
       phone: accountForm.phone.trim(),
     }
-    if (authStore.user) {
-      Object.assign(authStore.user as any, patch)
+    const res = await userApi.updateAccountInfo(payload)
+    const body = res.data
+    if (body?.code === 200) {
+      if (authStore.user) {
+        Object.assign(authStore.user as any, payload)
+      }
+      snapshotAccount() // 刷新基线，避免再次点击被误判为「已修改」
+      ElMessage.success(body.message || '账号信息已保存')
+    } else {
+      ElMessage.error(body?.message || '保存失败')
     }
-    await new Promise((r) => setTimeout(r, 200))
-    ElMessage.success('已保存（仅本地预览，刷新后丢失）')
+  } catch (e: any) {
+    ElMessage.error(
+      e?.response?.data?.detail || e?.response?.data?.message || '保存失败，请稍后重试',
+    )
   } finally {
     savingAccount.value = false
   }
