@@ -2,9 +2,9 @@ from fastapi import APIRouter,Depends,status
 from config import database_config
 from sqlalchemy.ext.asyncio import AsyncSession
 from schema.user import (UserRequest,UserAuthResponse,UserInfoResponse,UserLoginRequest,UserLoginResponse,UserLoginAuthResponse,CurrentUserResponse,UserDetailInfo,
-                         UserDetailInfoResponse,UserInformation,UserInformationResponse,UserAccountInfo,UserAccountInfoResponse)
+                         UserDetailInfoResponse,UserInformation,UserInformationResponse,UserAccountInfo,UserAccountInfoResponse,UserUpdatePassword)
 from crud.user import (get_user_by_name,create_user,create_token,authenticate_user,
-                       fetch_user_info_by_token,get_status,update_status,update_information,fetch_account_info_by_token,update_account_info_by_token)
+                       fetch_user_info_by_token,get_status,update_status,update_information,fetch_account_info_by_token,update_account_info_by_token,update_user_password)
 from fastapi.exceptions import HTTPException
 import uuid
 from utils import response
@@ -135,3 +135,12 @@ async def update_account_info(account_info:UserAccountInfo,db:AsyncSession=Depen
             user_info=response_data,
         )
     )
+
+# 用户修改密码
+@router.patch("/update/password")
+async def update_password(update_password_info:UserUpdatePassword,db:AsyncSession=Depends(database_config.get_session_orm),token:OAuth2PasswordBearer=Depends(oauth2_scheme)):
+    result=await update_user_password(token=token,db=db,update_password_info=update_password_info)
+    if result:
+        return response.success_response(message="Password changed successfully")
+    else:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="Wrong password!")

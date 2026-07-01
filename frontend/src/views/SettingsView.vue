@@ -345,12 +345,35 @@ async function handleSavePassword() {
   if (!validatePassword()) return
   savingPassword.value = true
   try {
-    await new Promise((r) => setTimeout(r, 200))
-    // 密码不写回 store，仅清空输入
-    passwordForm.oldPassword = ''
-    passwordForm.newPassword = ''
-    passwordForm.confirmPassword = ''
-    ElMessage.success('密码修改成功（仅前端演示，未对接后端）')
+    const res = await userApi.updatePassword({
+      oldPassword: passwordForm.oldPassword,
+      newPassword: passwordForm.newPassword,
+      confirmPassword: passwordForm.confirmPassword,
+    })
+    const body = res.data
+    if (body?.code === 200) {
+      // 密码不写回 store，仅清空输入
+      passwordForm.oldPassword = ''
+      passwordForm.newPassword = ''
+      passwordForm.confirmPassword = ''
+      // 后端 message 为英文，统一映射为中文
+      const msgMap: Record<string, string> = {
+        'Password changed successfully': '密码修改成功',
+      }
+      ElMessage.success(msgMap[body.message] || body.message || '密码修改成功')
+    } else {
+      ElMessage.error(body?.message || '密码修改失败')
+    }
+  } catch (e: any) {
+    // 后端全局异常处理器把 HTTPException 包装成 { code, message, data }，
+    // 错误文本在 message 字段（无 detail）；统一映射为中文提示
+    const detailMap: Record<string, string> = {
+      'Wrong password!': '密码输入错误',
+      'Update failed!': '密码修改失败',
+      'User does not exist!': '用户不存在，请重新登录',
+    }
+    const raw = e?.response?.data?.detail || e?.response?.data?.message || ''
+    ElMessage.error(detailMap[raw] || raw || '密码修改失败，请稍后重试')
   } finally {
     savingPassword.value = false
   }

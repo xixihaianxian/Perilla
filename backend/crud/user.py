@@ -1,7 +1,7 @@
-from sqlalchemy import select,update
+from sqlalchemy import select,update,insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from models import recommend,user
-from schema.user import UserRequest
+from schema.user import UserRequest,UserUpdatePassword
 from utils import security
 from datetime import datetime,timedelta
 from config.setting import AvatarSetting
@@ -14,6 +14,7 @@ import asyncio
 from fastapi.exceptions import HTTPException
 from fastapi import status
 import pydantic
+from utils import security
 
 # 根据用户名获取用户
 async def get_user_by_name(username:str,db:AsyncSession):
@@ -252,6 +253,42 @@ async def update_account_info_by_token(token,db:AsyncSession,account_info:pydant
             result=await db.execute(stmt)
             account_info=result.first()
             return account_info
+
+# 更新用户密码
+async def update_user_password(token,db:AsyncSession,update_password_info:UserUpdatePassword):
+    stmt=select(
+        recommend.User.password_hash,
+        recommend.User.id,
+    ).join(
+        user.UserToken,
+        user.UserToken.user_id==recommend.User.id
+    ).where(
+        user.UserToken.token==token
+    )
+    result=await db.execute(stmt)
+    data=result.first()
+    if data is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="User does not exist!")
+    else:
+        old_password_hash=data.password_hash
+        # 密码输入正确
+        if security.verify_password(old_password_hash,update_password_info.current_password):
+            # 确认密码正确
+            if update_password_info.new_password==update_password_info.confirm_password:
+                new_password_hash=security.get_hash_password(update_password_info.new_password)
+                query=update(recommend.User).where(recommend.User.id==data.id).values(password_hash=new_password_hash)
+                result=await db.execute(query)
+                await db.commit()
+                if result.rowcount==0:
+                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Update failed!")
+                else:
+                    return True
+            # 确认密码错误
+            else:
+                pass
+        # 密码输入错误
+        else:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Wrong password!")
 
 if __name__=="__main__":
     # status=asyncio.run(fetch_status())

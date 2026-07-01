@@ -42,6 +42,16 @@ export const userApi = {
     return instance.patch('/user/update/account/info', data)
   },
 
+  async updatePassword(data: { oldPassword: string; newPassword: string; confirmPassword: string }) {
+    // 后端 schema UserUpdatePassword 用 PascalCase alias 且未开启 populate_by_name，
+    // 故请求体 key 必须为 CurrentPassword / NewPassword / ConfirmPassword
+    return instance.patch('/user/update/password', {
+      CurrentPassword: data.oldPassword,
+      NewPassword: data.newPassword,
+      ConfirmPassword: data.confirmPassword,
+    })
+  },
+
   async getProfile(userId: string) {
     const user = mockDB.users.get(userId)
     if (!user) throw new Error('用户不存在')

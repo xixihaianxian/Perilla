@@ -139,3 +139,12 @@ class UserAccountInfoResponse(BaseModel):
         from_attributes=True,
         populate_by_name=True,
     )
+
+#修改代码时需要提交的信息
+class UserUpdatePassword(BaseModel):
+    current_password:str=Field(...,validation_alias="CurrentPassword",serialization_alias="CurrentPassword")
+    new_password:str=Field(...,validation_alias="NewPassword",serialization_alias="NewPassword")
+    confirm_password:str=Field(...,validation_alias="ConfirmPassword",serialization_alias="ConfirmPassword")
+    model_config = ConfigDict(
+        populate_by_name=True
+    )

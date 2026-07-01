@@ -141,3 +141,5 @@ show create table user;
 select * from user_token;
 
 select * from user;
+
+show create table user;
