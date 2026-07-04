@@ -85,8 +85,8 @@ async function toggleSave(e: Event) {
       </div>
 
       <button
-        class="absolute top-2.5 right-2.5 w-9 h-9 flex items-center justify-center bg-white/85 backdrop-blur-sm rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-200 hover:scale-110 shadow-md"
-        :class="{ 'text-primary': isFavorited, 'animate-bookmark-pop': justSaved === note.id }"
+        class="absolute top-2.5 right-2.5 w-9 h-9 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-200 hover:scale-110 shadow-md"
+        :class="{ 'text-violet-500': isFavorited, 'text-violet-300': !isFavorited, 'animate-bookmark-pop': justSaved === note.id }"
         @click="toggleSave"
       >
         <el-icon :size="16"><StarFilled v-if="isFavorited" /><Star v-else /></el-icon>

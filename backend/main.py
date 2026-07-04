@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import recommend,user
+from routers import recommend,user,favorite
 from fastapi.middleware.cors import CORSMiddleware
 from utils import abnormal
 from fastapi.staticfiles import StaticFiles
@@ -28,3 +28,4 @@ async def root():
 
 app.include_router(recommend.router)
 app.include_router(user.router)
+app.include_router(favorite.router)
