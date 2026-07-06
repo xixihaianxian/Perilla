@@ -49,12 +49,23 @@ async function toggleSave(e: Event) {
     return
   }
   try {
-    const res = await favoriteApi.toggleFavorite(authStore.user!.id, props.note.id)
-    isFavorited.value = res.data.favorited
-    justSaved.value = props.note.id
-    emit('favoriteToggle', props.note.id, isFavorited.value)
-    setTimeout(() => { justSaved.value = null }, 500)
-  } catch { /* ignore */ }
+    const res = await favoriteApi.proactiveCollection(Number(props.note.id))
+    const body = res.data
+    if (body?.code === 200) {
+      // 后端 method 字段即收藏状态："favorite"=已收藏，"cancel"=已取消（message 恒为 "success"）
+      isFavorited.value = body.method === 'favorite'
+      justSaved.value = props.note.id
+      emit('favoriteToggle', props.note.id, isFavorited.value)
+      setTimeout(() => { justSaved.value = null }, 500)
+      ElMessage.success(isFavorited.value ? '收藏成功' : '取消收藏成功')
+    } else {
+      ElMessage.error(body?.message || '操作失败')
+    }
+  } catch (e: any) {
+    ElMessage.error(
+      e?.response?.data?.detail || e?.response?.data?.message || '操作失败，请稍后重试',
+    )
+  }
 }
 </script>
 
@@ -85,7 +96,7 @@ async function toggleSave(e: Event) {
       </div>
 
       <button
-        class="absolute top-2.5 right-2.5 w-9 h-9 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-200 hover:scale-110 shadow-md"
+        class="absolute top-2.5 right-2.5 z-10 w-9 h-9 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-200 hover:scale-110 shadow-md"
         :class="{ 'text-violet-500': isFavorited, 'text-violet-300': !isFavorited, 'animate-bookmark-pop': justSaved === note.id }"
         @click="toggleSave"
       >
