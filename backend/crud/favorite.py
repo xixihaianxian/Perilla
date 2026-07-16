@@ -5,6 +5,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi import status
 from fastapi.exceptions import HTTPException
 from sqlalchemy.exc import IntegrityError,SQLAlchemyError
+from typing import List
 
 async def get_user_id_by_token(token:OAuth2PasswordBearer,db:AsyncSession):
     stmt=select(
@@ -55,3 +56,16 @@ async def update_favorite_info(topic_id:int,token:OAuth2PasswordBearer,db:AsyncS
         return favorite_info,"cancel"
     except SQLAlchemyError as error:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="The server's acting up!")
+
+# 获取收藏话题的id
+async def fetch_collect_topics_id(token:OAuth2PasswordBearer,db:AsyncSession):
+    user_id=await get_user_id_by_token(token=token,db=db)
+    stmt=select(
+        favorite.Favorite.topic_id
+    ).where(
+        favorite.Favorite.user_id==user_id
+    )
+    result=await db.execute(stmt)
+    # 返回一个列表
+    favorite_topics=result.scalars().all()
+    return favorite_topics

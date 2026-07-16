@@ -4,6 +4,8 @@ import type { Note } from '@/types'
 import type { FeedType } from '@/types/common'
 import { tagApi, type Category } from '@/api/tag'
 import { topicApi, type TopicItem } from '@/api/topic'
+import { favoriteApi } from '@/api/favorite'
+import { useAuthStore } from '@/stores/authStore'
 import NoteWaterfall from '@/components/content/NoteWaterfall.vue'
 import TopicDetailDialog, { type TopicDialogData } from '@/components/content/TopicDetailDialog.vue'
 import { getCoverUrl } from '@/utils/cover'
@@ -47,6 +49,19 @@ const topics = ref<Note[]>([])
 const topicPage = ref(1)
 const topicHasMore = ref(true)
 const topicLoading = ref(false)
+
+// 当前用户已收藏的话题 id 集合（用于点亮卡片收藏按钮）
+const authStore = useAuthStore()
+const collectedIds = ref<Set<string>>(new Set())
+
+async function fetchCollectedIds() {
+  try {
+    const ids = await favoriteApi.getCollectedTopicIds()
+    collectedIds.value = new Set(ids.map(String))
+  } catch {
+    /* 静默：接口异常时不影响列表展示 */
+  }
+}
 
 // Topic dialog state
 const topicDialogVisible = ref(false)
@@ -145,7 +160,10 @@ async function fetchTopics(reset = false) {
     })
     const notes = res.topics.map((item) => {
       topicItemMap.set(String(item.id), item)
-      return topicToNote(item)
+      const note = topicToNote(item)
+      // 按已收藏 id 集合点亮收藏按钮
+      note.is_favorited = collectedIds.value.has(String(item.id))
+      return note
     })
     // 批量获取每个话题的收藏数
     const statsResults = await Promise.allSettled(
@@ -202,9 +220,11 @@ async function fetchTags() {
   }
 }
 
-onMounted(() => {
-  fetchTopics(true)
+onMounted(async () => {
   fetchTags()
+  // 登录用户先拉取已收藏话题 id，再加载列表以便点亮收藏按钮
+  if (authStore.isAuthenticated) await fetchCollectedIds()
+  fetchTopics(true)
 })
 </script>
 

@@ -38,3 +38,7 @@ show create table favorite;
 desc favorite;
 
 select * from favorite;
+
+show create table favorite;
+
+select * from user_token;

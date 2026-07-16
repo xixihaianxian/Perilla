@@ -19,3 +19,11 @@ async def proactive_collection(topic_id:int,token:OAuth2PasswordBearer=Depends(o
         method=method,
         data=schema_favorite.FavoriteMethodResponse(token=token,favorite_method=response_data)
     )
+
+# 收藏展示
+@router.get("/exhibit/collect/topics")
+async def exhibit_collect_topics(token:OAuth2PasswordBearer=Depends(oauth2_scheme),db:AsyncSession=Depends(database_config.get_session_orm)):
+    favorite_topics_id=await crud_favorite.fetch_collect_topics_id(token=token,db=db)
+    return response.success_response(
+        data=favorite_topics_id,
+    )
