@@ -42,3 +42,5 @@ select * from favorite;
 show create table favorite;
 
 select * from user_token;
+
+select * from topic_start_browser;

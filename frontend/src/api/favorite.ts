@@ -10,10 +10,10 @@ export const favoriteApi = {
   },
 
   // 获取当前用户已收藏的话题 id 列表
-  // 响应 { code:200, message:"success", data:[1,2,3,...] }
+  // 响应 { code:200, message:"success", data:{ token, exhibit:[1,2,3,...] } }
   async getCollectedTopicIds() {
     const res = await instance.get('/favorite/exhibit/collect/topics')
-    return (res.data?.data ?? []) as number[]
+    return (res.data?.data?.exhibit ?? []) as number[]
   },
 
   async toggleFavorite(userId: string, noteId: string, folderId?: string) {

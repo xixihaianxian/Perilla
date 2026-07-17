@@ -25,5 +25,13 @@ async def proactive_collection(topic_id:int,token:OAuth2PasswordBearer=Depends(o
 async def exhibit_collect_topics(token:OAuth2PasswordBearer=Depends(oauth2_scheme),db:AsyncSession=Depends(database_config.get_session_orm)):
     favorite_topics_id=await crud_favorite.fetch_collect_topics_id(token=token,db=db)
     return response.success_response(
-        data=favorite_topics_id,
+        data=schema_favorite.ExhibitFavoriteResponse(
+            token=token,
+            exhibit=favorite_topics_id,
+        )
     )
+
+# 更新收藏次数
+@router.patch("/update/favorite/number")
+async def update_favorite_number(control:schema_favorite.UpdateTopicStartRequest,db:AsyncSession=Depends(database_config.get_session_orm)):
+    pass
