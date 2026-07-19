@@ -29,3 +29,11 @@ class ExhibitFavoriteResponse(BaseModel):
 class UpdateTopicStartRequest(BaseModel):
     topic_id:int
     method:str=Field(default="cancel")
+
+
+# start update log
+class StartUpdateResponse(BaseModel):
+    token:str
+    user:int=Field(description="user id")
+    topic:int=Field(description="topic id")
+    method:str=Field(default="cancel or favorite")

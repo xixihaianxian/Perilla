@@ -5,6 +5,8 @@ from config import database_config
 from crud import favorite as crud_favorite
 from schema import favorite as schema_favorite
 from utils import response
+from fastapi.exceptions import HTTPException
+from  fastapi import status
 
 oauth2_scheme=OAuth2PasswordBearer("/api/user/login")
 
@@ -33,5 +35,11 @@ async def exhibit_collect_topics(token:OAuth2PasswordBearer=Depends(oauth2_schem
 
 # 更新收藏次数
 @router.patch("/update/favorite/number")
-async def update_favorite_number(control:schema_favorite.UpdateTopicStartRequest,db:AsyncSession=Depends(database_config.get_session_orm)):
-    pass
+async def update_favorite_number(token:OAuth2PasswordBearer=Depends(oauth2_scheme),control:schema_favorite.UpdateTopicStartRequest=None,db:AsyncSession=Depends(database_config.get_session_orm)):
+    if control is None:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="Request failed!")
+    else:
+        update_response=await crud_favorite.update_start(token=token,control=control,db=db)
+        return response.success_response(
+            data=update_response.model_dump()
+        )

@@ -16,6 +16,12 @@ export const favoriteApi = {
     return (res.data?.data?.exhibit ?? []) as number[]
   },
 
+  // 更新话题收藏数（收藏 +1 / 取消 -1）
+  // 请求体 { topic_id, method }，method: "favorite" | "cancel"
+  async updateFavoriteNumber(data: { topic_id: number; method: string }) {
+    return instance.patch('/favorite/update/favorite/number', data)
+  },
+
   async toggleFavorite(userId: string, noteId: string, folderId?: string) {
     return mockDB.toggleFavorite(userId, noteId, folderId)
   },

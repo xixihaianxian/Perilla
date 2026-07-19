@@ -34,6 +34,8 @@ function onCardClick() {
 const authStore = useAuthStore()
 const justSaved = ref<string | null>(null)
 const isFavorited = ref(props.note.is_favorited)
+// 收藏数展示（本地维护，收藏/取消后乐观增减）
+const likeCount = ref(props.note.like_count)
 
 function formatCount(count: number): string {
   if (count >= 10000) return `${(count / 10000).toFixed(1)}万`
@@ -58,6 +60,13 @@ async function toggleSave(e: Event) {
       emit('favoriteToggle', props.note.id, isFavorited.value)
       setTimeout(() => { justSaved.value = null }, 500)
       ElMessage.success(isFavorited.value ? '收藏成功' : '取消收藏成功')
+      // 把收藏结果同步给后端更新收藏数，成功后本地展示 ±1（失败不影响收藏状态）
+      favoriteApi
+        .updateFavoriteNumber({ topic_id: Number(props.note.id), method: body.method })
+        .then(() => {
+          likeCount.value += body.method === 'favorite' ? 1 : -1
+        })
+        .catch(() => {})
     } else {
       ElMessage.error(body?.message || '操作失败')
     }
@@ -108,7 +117,7 @@ async function toggleSave(e: Event) {
       >
         <span class="text-white text-xs flex items-center gap-1 font-medium">
           <el-icon :size="12"><StarFilled /></el-icon>
-          {{ formatCount(note.like_count) }}
+          {{ formatCount(likeCount) }}
         </span>
         <span class="text-white text-xs">{{ formatCount(note.comment_count) }} 评论</span>
       </div>
@@ -129,7 +138,7 @@ async function toggleSave(e: Event) {
         </div>
         <div class="flex items-center gap-1 text-text-card-tertiary shrink-0">
           <el-icon :size="14"><StarFilled v-if="note.is_liked" class="text-like" /><Star v-else /></el-icon>
-          <span class="text-xs">{{ formatCount(note.like_count) }}</span>
+          <span class="text-xs">{{ formatCount(likeCount) }}</span>
         </div>
       </div>
     </div>
