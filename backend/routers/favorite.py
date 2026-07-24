@@ -12,7 +12,6 @@ oauth2_scheme=OAuth2PasswordBearer("/api/user/login")
 
 router=APIRouter(prefix="/api/favorite",tags=["favorite"])
 
-
 @router.post("/proactive/collection")
 async def proactive_collection(topic_id:int,token:OAuth2PasswordBearer=Depends(oauth2_scheme),db:AsyncSession=Depends(database_config.get_session_orm)):
     data,method=await crud_favorite.update_favorite_info(topic_id=topic_id,token=token,db=db)

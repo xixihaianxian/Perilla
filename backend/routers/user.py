@@ -50,6 +50,7 @@ async def register(user_info:UserRequest,db:AsyncSession=Depends(database_config
 async def login(user_info:UserLoginRequest,db:AsyncSession=Depends(database_config.get_session_orm)):
     authenticate,user=await authenticate_user(db=db,name_or_email=user_info.name_or_email,password=user_info.password)
     if authenticate:
+        # create_token会自动判断token有没有过去，同时返回token
         token=await create_token(db=db,user_id=user.id)
         response_data=UserLoginResponse.model_validate(user)
         return response.success_response(data=UserLoginAuthResponse(token=token,user_info=response_data))

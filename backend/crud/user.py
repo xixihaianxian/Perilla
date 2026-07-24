@@ -15,6 +15,37 @@ from fastapi.exceptions import HTTPException
 from fastapi import status
 import pydantic
 from utils import security
+from  datetime import datetime
+
+# 根据id获取token,同时更新token
+async def fetch_token_by_user_id_or_update_token(user_id:int,db:AsyncSession):
+    stmt=select(
+        user.UserToken.token,
+        user.UserToken.expires_at,
+    ).where(
+        user.UserToken.user_id==user_id
+    )
+    result=await db.execute(statement=stmt)
+    data=result.all()
+    now=datetime.now()
+    # token过期
+    if now > data.expires_at:
+        token=security.new_token()
+        stmt=update(
+            user.UserToken
+        ).where(
+            user.UserToken.id==user_id
+        ).values(
+            token=token,
+            expires_at=now + timedelta(days=7)
+        )
+        result=await db.execute(statement=stmt)
+        if result.rowcount==0:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="Update token failed")
+        else:
+            return token
+    else:
+        return data.token
 
 # 根据用户名获取用户
 async def get_user_by_name(username:str,db:AsyncSession):
@@ -72,11 +103,11 @@ async def create_token(db:AsyncSession,user_id:int):
 
 # 判断用户是否存在
 async def authenticate_user(db:AsyncSession,name_or_email,password)->tuple:
-    # 根据用户名来判断
+    # 如果用输入密码，根据用户名来判断
     stmt_by_name=select(recommend.User).where(recommend.User.username==name_or_email)
     result_by_name=await db.execute(stmt_by_name)
     user_by_name=result_by_name.scalar_one_or_none()
-    # 更具邮箱来判断
+    # 如果用户输入邮箱，根据邮箱来判断
     stmt_by_email=select(recommend.User).where(recommend.User.email==name_or_email)
     result_by_email=await db.execute(stmt_by_email)
     user_by_email=result_by_email.scalar_one_or_none()
@@ -88,8 +119,23 @@ async def authenticate_user(db:AsyncSession,name_or_email,password)->tuple:
         password_by_email = user_by_email.password_hash
         authenticate=security.verify_password(hash_password=password_by_email,password=password)
         return authenticate,user_by_email
-    else:
-        return False,None
+    return False,None
+    # 判断用户名是否存在和邮箱是否存在
+    # if user_by_email is not None and user_by_name is not None:
+    #     # 判断用户名和用户邮箱是否对应
+    #     if user_by_email.id == user_by_name.id:
+    #         # await fetch_token_by_user_id_or_update_token(user_id=user_by_email.id,db=db)
+    #         password_verify=user_by_email.password_hash
+    #         authenticate = security.verify_password(hash_password=password_verify, password=password)
+    #         if authenticate:
+    #             return authenticate, user_by_email
+    #         else:
+    #             return False,None
+    #     # 用户和用户邮箱不对应
+    #     else:
+    #         return False,None
+    # else:
+    #     return False,None
 
 # 根据token查找用户信息
 async def fetch_user_info_by_token(token:str,db:AsyncSession):
